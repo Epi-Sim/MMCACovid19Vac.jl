@@ -322,6 +322,14 @@ struct NPI_Params
     tᶜs::Array{Int64, 1}
 end
 
+function NPI_Params(κ₀s::Array{Float64, 1}
+                    ϕs::Array{Float64, 1}
+                    δs::Array{Float64, 1}
+                    tᶜs::Array{Int64, 1})
+
+  return NPI_Params(κ₀s, ϕs, δs, tᶜs)
+end
+
 
   ### ----------------------------------------------------------------------------
 ### PATCH AND POPULATION RELATED FUNCTIONS
