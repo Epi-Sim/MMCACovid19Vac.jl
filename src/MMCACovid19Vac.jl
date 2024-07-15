@@ -12,7 +12,7 @@ export Epidemic_Params,
 	reset_epidemic_params!,
 	reset_params!,
 	set_initial_conditions!,
-	correct_self_loops!,
+	correct_self_loops,
 	compute_R_eff
 
 include("mmca.jl")
