@@ -6,7 +6,7 @@ function create_default_epi_params()
     epiparams_dict["ηᵍ"] = [0.2747252747252747, 0.2747252747252747, 0.2747252747252747]
     epiparams_dict["αᵍ"] = [0.26595744680851063, 0.641025641025641, 0.641025641025641]
     epiparams_dict["μᵍ"] = [1.0, 0.3125, 0.3125]
-    epiparams_dict["θᵍ"] = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+    epiparams_dict["θᵍ"] = [0.0, 0.0, 0.0]
     epiparams_dict["γᵍ"] = [0.003, 0.01, 0.08]
     epiparams_dict["ζᵍ"] = [0.12820512820512822, 0.12820512820512822, 0.12820512820512822]
     epiparams_dict["λᵍ"] = [1.0, 1.0, 1.0]
@@ -15,8 +15,8 @@ function create_default_epi_params()
     epiparams_dict["χᵍ"] = [0.047619047619047616, 0.047619047619047616, 0.047619047619047616]
     epiparams_dict["Λ"] = 0.02
     epiparams_dict["Γ"] = 0.01
-    epiparams_dict["rᵥ"] = [0.0, 0.6]
-    epiparams_dict["kᵥ"] = [0.0, 0.4]
+    epiparams_dict["rᵥ"] = [0.0, 0.6, 0.0]
+    epiparams_dict["kᵥ"] = [0.0, 0.4, 0.0]
     epiparams_dict["risk_reduction_dd"] = 0.0
     epiparams_dict["risk_reduction_h"] = 0.1
     epiparams_dict["risk_reduction_d"] = 0.05
@@ -60,6 +60,7 @@ function create_default_npiparameters()
     npiparams_dict["ϕs"] = [1.0]
     npiparams_dict["δs"] = [0.0]
     npiparams_dict["tᶜs"] =  [1]
+    npiparams_dict["are_there_npi"]: true
 
     return npiparams_dict
 end
