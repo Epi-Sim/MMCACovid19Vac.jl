@@ -7,6 +7,7 @@ using CSV, NPZ, JSON, HDF5, DataStructures, DelimitedFiles, DataFrames, NetCDF
 include("utils.jl")
 export Epidemic_Params,
 	Population_Params,
+	NPI_Params,
 	update_epidemic_params!,
 	update_population_params!,
 	reset_epidemic_params!,
