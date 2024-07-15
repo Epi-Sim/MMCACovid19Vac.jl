@@ -12,22 +12,12 @@ export Epidemic_Params,
 	reset_epidemic_params!,
 	reset_params!,
 	set_initial_conditions!,
+	correct_self_loops!,
 	compute_R_eff
 
 include("mmca.jl")
 export run_epidemic_spreading_mmca!,
     run_epidemic_spreading_mmca!
     
-
-include("io.jl")
-export create_default_epi_params,
-	create_default_population_params,
-	create_default_vacparameters,
-	create_default_npiparameters,
-	init_pop_param_struct,
-	init_epi_parameters_struct,
-	init_NPI_parameters_struct,
-	save_simulation_hdf5,
-	save_simulation_netCDF
 
 end
