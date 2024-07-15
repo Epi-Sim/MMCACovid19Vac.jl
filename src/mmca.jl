@@ -148,7 +148,7 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                 
                 # Infection probability
                 Πᵢᵍᵥ = (1 - pᵍ_eff[g]) * Pᵢᵍᵥ[g, i, v] + pᵍ_eff[g] * τᵢᵍᵥ[g, i, v]
-                
+
                 # Pier: this is an ugly fix to avoid the problem of getting more vaccines that susceptibles
                 # TO DO: incorporate this condition in the function optimal_vaccination_distribution
                 if (v == 1) & ( (Πᵢᵍᵥ * (1 - CHᵢ) * ρˢᵍᵥ[g, i, t, v] + new_vaccinated[g, i]) > ρˢᵍᵥ[g, i, t, v] )
@@ -156,7 +156,7 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                     new_vaccinated[g, i] = ρˢᵍᵥ[g, i, t, v] - Πᵢᵍᵥ * (1 - CHᵢ) * ρˢᵍᵥ[g, i, t, v] - 1e-10
                 end
 
-                # Epidemic compartments, where all states of vaccination are present
+                #Epidemic compartments, where all states of vaccination are present
                 ρˢᵍᵥ[g, i, t + 1, v] = ( 1 - Πᵢᵍᵥ ) * (1 - CHᵢ) * ρˢᵍᵥ[g, i, t, v] +
                     new_vaccinated[g, i] * ( [-1, +1, 0][v] ) +
                     Λ * ( [0, -1, +1][v] ) * ρˢᵍᵥ[g, i, t, 2] +  # The term inside the parentheses works as a if-then clause
@@ -194,8 +194,8 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                     aux = ρˢᵍᵥ[g, i, t, v]
                     ρˢᵍᵥ[g, i, t, v] -= CHᵢᵍᵥ[g, i, t, v] 
                     CHᵢᵍᵥ[g, i, t + 1, v] = CHᵢ * aux
-                end 
-            end   
+                end
+            end
             
             # Reset values
             τᵢᵍᵥ[g, i, :] .= 0.
@@ -203,7 +203,7 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
             Pᵢᵍᵥ[g, i, :] .= 0. 
         end
     end
-    
+
 end
 
 
@@ -499,8 +499,8 @@ function optimal_vaccination_distribution(ϵᵍ::Array{Float64, 1},
                                           ρˢᵍᵥ::Array{Float64, 4},
                                           nᵢᵍ::Array{Float64, 2},
                                           t::Int64)
-
     Nᵥ = sum(ϵᵍ) # Total number of vaccines
+    (G, M, T, V) = size(ρˢᵍᵥ)
     (G, M) = size(nᵢᵍ)
 
     if Nᵥ == 0

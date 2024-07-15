@@ -132,12 +132,12 @@ function init_pop_param_struct(G::Int64, M::Int64,
     # Average household size
     σ = pop_params_dict["σ"]
 
-    edgelist      = Array{Int64, 2}(network_df[:, 1:2])
-    Rᵢⱼ           = copy(network_df[:, 3])
+    edgelist = Array{Int64, 2}(network_df[:, 1:2])
+    Rᵢⱼ      = copy(network_df[:, 3])
     edgelist, Rᵢⱼ = correct_self_loops(edgelist, Rᵢⱼ, M)
-    pop_parmas    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
+    pop_params    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
 
-    return pop_parmas
+    return pop_params
 end
 
 function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
@@ -216,7 +216,7 @@ function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename::Stri
         #Supposing ϕs and δs are constant, while the confinement measures are applied
         ϕs = fill(ϕs_aux[1], length(tᶜs))
         δs = fill(δs_aux[1], length(tᶜs))
-        
+
     else
         # Timesteps when the containment measures will be applied
         tᶜs = npi_params_dict["tᶜs"]
