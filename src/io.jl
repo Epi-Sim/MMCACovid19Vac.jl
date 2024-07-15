@@ -6,7 +6,7 @@ function create_default_epi_params()
     epiparams_dict["ηᵍ"] = [0.2747252747252747, 0.2747252747252747, 0.2747252747252747]
     epiparams_dict["αᵍ"] = [0.26595744680851063, 0.641025641025641, 0.641025641025641]
     epiparams_dict["μᵍ"] = [1.0, 0.3125, 0.3125]
-    epiparams_dict["θᵍ"] = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+    epiparams_dict["θᵍ"] = [0.0, 0.0, 0.0]
     epiparams_dict["γᵍ"] = [0.003, 0.01, 0.08]
     epiparams_dict["ζᵍ"] = [0.12820512820512822, 0.12820512820512822, 0.12820512820512822]
     epiparams_dict["λᵍ"] = [1.0, 1.0, 1.0]
@@ -15,8 +15,8 @@ function create_default_epi_params()
     epiparams_dict["χᵍ"] = [0.047619047619047616, 0.047619047619047616, 0.047619047619047616]
     epiparams_dict["Λ"] = 0.02
     epiparams_dict["Γ"] = 0.01
-    epiparams_dict["rᵥ"] = [0.0, 0.6]
-    epiparams_dict["kᵥ"] = [0.0, 0.4]
+    epiparams_dict["rᵥ"] = [0.0, 0.6, 0.0]
+    epiparams_dict["kᵥ"] = [0.0, 0.4, 0.0]
     epiparams_dict["risk_reduction_dd"] = 0.0
     epiparams_dict["risk_reduction_h"] = 0.1
     epiparams_dict["risk_reduction_d"] = 0.05
@@ -60,6 +60,7 @@ function create_default_npiparameters()
     npiparams_dict["ϕs"] = [1.0]
     npiparams_dict["δs"] = [0.0]
     npiparams_dict["tᶜs"] =  [1]
+    npiparams_dict["are_there_npi"] = true
 
     return npiparams_dict
 end
@@ -132,12 +133,12 @@ function init_pop_param_struct(G::Int64, M::Int64,
     # Average household size
     σ = pop_params_dict["σ"]
 
-    edgelist      = Array{Int64, 2}(network_df[:, 1:2])
-    Rᵢⱼ           = copy(network_df[:, 3])
+    edgelist = Array{Int64, 2}(network_df[:, 1:2])
+    Rᵢⱼ      = copy(network_df[:, 3])
     edgelist, Rᵢⱼ = correct_self_loops(edgelist, Rᵢⱼ, M)
-    pop_parmas    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
+    pop_params    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
 
-    return pop_parmas
+    return pop_params
 end
 
 function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
@@ -216,7 +217,7 @@ function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename::Stri
         #Supposing ϕs and δs are constant, while the confinement measures are applied
         ϕs = fill(ϕs_aux[1], length(tᶜs))
         δs = fill(δs_aux[1], length(tᶜs))
-        
+
     else
         # Timesteps when the containment measures will be applied
         tᶜs = npi_params_dict["tᶜs"]
