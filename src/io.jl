@@ -197,7 +197,7 @@ function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
     return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
 end
 
-function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename::String)
+function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename)
     if !isnothing(kappa0_filename)
         kappa0_filename = joinpath(data_path, kappa0_filename)
         @info "- Loading κ₀ time series from $(kappa0_filename)"
