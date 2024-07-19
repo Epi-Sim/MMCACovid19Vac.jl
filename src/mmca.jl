@@ -139,12 +139,11 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
         
         # Update compartmental probabilities
         for g in 1:G
+            if tᶜ == t
+                ρˢᵍᵥ[g, i, t, :] .= ρˢᵍᵥ[g, i, t, :] .+ CHᵢᵍᵥ[g, i, t, :]
+            end  
                   
-            @simd for v in 1:V
-                
-                if tᶜ == t
-                    ρˢᵍᵥ[g, i, t, v] += CHᵢᵍᵥ[g, i, t, v]
-                end  
+            @simd for v in 1:V 
                 
                 # Infection probability
                 Πᵢᵍᵥ = (1 - pᵍ_eff[g]) * Pᵢᵍᵥ[g, i, v] + pᵍ_eff[g] * τᵢᵍᵥ[g, i, v]
@@ -190,12 +189,15 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                 ρᴰᵍᵥ[g, i, t + 1, v] = ρᴰᵍᵥ[g, i, t, v] + ζᵍ[g] * ρᴾᴰᵍᵥ[g, i, t, v] +
                     ψᵍ[g] * ρᴴᴰᵍᵥ[g, i, t, v]
                 
-                if tᶜ == t
+            end
+
+            if tᶜ == t
+                for v in 1:V
                     aux = ρˢᵍᵥ[g, i, t, v]
                     ρˢᵍᵥ[g, i, t, v] -= CHᵢᵍᵥ[g, i, t, v] 
-                    CHᵢᵍᵥ[g, i, t + 1, v] = CHᵢ * aux
+                    CHᵢᵍᵥ[g, i, t + 1 , v] = CHᵢ * aux
                 end
-            end
+            end  
             
             # Reset values
             τᵢᵍᵥ[g, i, :] .= 0.
@@ -679,7 +681,7 @@ function run_epidemic_spreading_mmca!(epi_params::Epidemic_Params,
     Sᵢᵍᵥ = zeros(Float64, G, M, V)
 
     κ₀s = npi_params.κ₀s
-      ϕs = npi_params.ϕs
+     ϕs = npi_params.ϕs
     δs = npi_params.δs
     tᶜs = npi_params.tᶜs
 
