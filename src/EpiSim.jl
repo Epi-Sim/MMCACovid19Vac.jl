@@ -1,6 +1,9 @@
 module EpiSim
 
 using MMCACovid19Vac
+using ArgParse
+import JSON
+import CSV
 using Dates, Logging
 using HDF5, DataFrames, NetCDF
 
@@ -17,13 +20,6 @@ export create_default_epi_params,
     init_NPI_parameters_struct,
     save_simulation_hdf5,
     save_simulation_netCDF
-end # module EpiSim
-
-
-
-
-
-
 
 function main(args)
 
@@ -147,7 +143,7 @@ function main(args)
 
     # Daily Mobility reduction
     kappa0_filename = get(data_dict, "kappa0_filename", nothing)
-    npi_params = init_NPI_parameters_struct(npi_params_dict, kappa0_filename)
+    npi_params = init_NPI_parameters_struct(data_path, npi_params_dict, kappa0_filename, first_day)
 
     # vac_parms = Vaccination_Params(tᵛs, ϵᵍs)
 
@@ -202,3 +198,51 @@ function main(args)
     end
 
 end
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table! s begin
+        "--config", "-c"
+            help = "config file (json file)"
+            required = true
+        "--data-folder", "-d"
+            help = "data folder"
+            required = true
+        "--instance-folder", "-i"
+            help = "instance folder (experiment folder)"
+            required = true 
+        "--export-compartments-full"
+            help = "export compartments of simulations"
+            action = :store_true
+        "--export-compartments-time-t"
+            help = "export compartments of simulations at a given time"
+            default = nothing
+            arg_type = Int
+        "--initial-conditions"
+            help = "compartments to initialize simulation. If missing, use the seeds to initialize the simulations"
+            default = nothing
+        "--start-date"
+            help = "starting date of simulation. Overwrites the one provided in config.json"
+            default = nothing
+        "--end-date"
+            help = "end date of simulation. Overwrites the one provided in config.json"
+            default = nothing
+    end
+
+    return parse_args(s)
+end
+
+function julia_main()::Cint
+    try
+        args = parse_commandline()
+        main(args)
+    catch
+        Base.invokelatest(Base.display_error, Base.catch_stack())
+        return 1
+    end
+
+    return 0
+end
+
+end # module EpiSim
