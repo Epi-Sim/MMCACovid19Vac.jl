@@ -15,6 +15,7 @@ export Epidemic_Params,
 	reset_epidemic_compartments!,
 	reset_params!,
 	set_initial_conditions!,
+	set_compartments!,
 	correct_self_loops
 
 
@@ -36,8 +37,8 @@ export create_default_epi_params,
 	print_status
 
 
-	include("compute.jl")
-	export compute_R_eff,
+include("compute.jl")
+export compute_R_eff,
 	optimal_vaccination_distribution
 
 
