@@ -30,6 +30,6 @@ if args["compile"]
     build_folder = "build"
     create_app(pwd(), build_folder, force=true)
     bin_path = abspath(joinpath(build_folder, "bin", "EpiSim"))
-    symlink_path = joinpath(args["compile"], "episim")
+    symlink_path = joinpath(args["target"], "episim")
     symlink(bin_path, symlink_path)
 end
