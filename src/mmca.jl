@@ -118,7 +118,6 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
     new_vaccinated = zeros(Float64, G, M)
     new_vaccinated .= ϵᵢᵍ ./ nᵢᵍ
     new_vaccinated[isnan.(new_vaccinated)] .= 0.
-    @info "Total vaccination", sum(new_vaccinated)
 
     # Update probabilities
     @inbounds for i in 1:M
