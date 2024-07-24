@@ -65,45 +65,13 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-function update_config!(config, cmd_line_args)
+function create_default_config!()
     # Define dictionary containing epidemic parameters
-    if !haskey(config, "epidemic_params")
-        config["epidemic_params"] = create_default_epi_params()
-    end
-
-    if !haskey(config, "population_params")
-        config["population_params"] = create_default_population_params()
-    end
-
-    # Define dictionary containing vaccination parameters
-    if !haskey(config, "vaccination")
-        config["vaccination"] = create_default_vacparameters()
-    end
-
-    # Define dictionary containing npi parameters
-    if (!haskey(config, "NPI") | !config["NPI"]["are_there_npi"] )
-        config["NPI"] = create_default_npiparameters()
-    end
-
-    # overwrite config with command line
-    if cmd_line_args["start-date"] !== nothing
-        config["simulation"]["first_day_simulation"] = cmd_line_args["start-date"]
-    end
-    if cmd_line_args["end-date"] !== nothing
-        config["simulation"]["last_day_simulation"] = cmd_line_args["end-date"]
-    end
-    if cmd_line_args["export-compartments-time-t"] !== nothing
-        config["simulation"]["export_compartments_time_t"] = cmd_line_args["export-compartments-time-t"]
-    end
-    if cmd_line_args["export-compartments-full"] == true
-        config["simulation"]["export_compartments_full"] = true
-    end
-
-    if cmd_line_args["initial-conditions"] !== nothing
-        config["data"]["initial-conditions"] = cmd_line_args["initial-conditions"]
-    end
-
-    nothing
+    # config = Dict
+    # config["epidemic_params"] = create_default_epi_params()
+    # config["population_params"] = create_default_population_params()
+    # config["vaccination"] = create_default_vacparameters()
+    # config["NPI"] = create_default_npiparameters()
 end
 
 """
