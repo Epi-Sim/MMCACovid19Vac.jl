@@ -330,238 +330,131 @@ function compute_P!(Pᵢᵍᵥ::Array{Float64, 3},
 end
 
 
-"""
-    print_status(epi_params::Epidemic_Params,
-                 population::Population_Params,
-                 t::Int64)
-
-Print the status of the epidemic spreading.
-"""
-function print_status(epi_params::Epidemic_Params,
-                      population::Population_Params,
-                      t::Int64)
-
-    players  = sum((epi_params.ρˢᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴾᴰᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴱᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴬᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴵᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴾᴴᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴴᴿᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴿᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴰᵍᵥ[:, :, t, :] .+
-                    epi_params.CHᵢᵍᵥ[:, :, t, :] ) .* population.nᵢᵍ[:, :])
-
-    sus3 = sum((epi_params.ρˢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :])
-
-    infected = sum(epi_params.ρᴵᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :] .+
-                   epi_params.ρᴬᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :])
-
-    cases3    = sum((epi_params.ρᴾᴰᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴿᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴰᵍᵥ[:, :, t, 3]) .* population.nᵢᵍ[:, :])
-
-    icus     = sum((epi_params.ρᴴᴿᵍᵥ[:, :, t, :] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, :]) .* population.nᵢᵍ[:, :])
-
-    deaths   = sum(epi_params.ρᴰᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :])
-
-    vaccine1 = sum((epi_params.ρˢᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴱᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴬᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴵᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴿᵍᵥ[:, :, t, 1] .+
-                    epi_params.ρᴰᵍᵥ[:, :, t, 1] .+
-                    epi_params.CHᵢᵍᵥ[:, :, t, 1] ) .* population.nᵢᵍ[:, :]) / population.N
-
-    vaccine2 = sum((epi_params.ρˢᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴱᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴬᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴵᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴿᵍᵥ[:, :, t, 2] .+
-                    epi_params.ρᴰᵍᵥ[:, :, t, 2] .+
-                    epi_params.CHᵢᵍᵥ[:, :, t, 2] ) .* population.nᵢᵍ[:, :]) / population.N
-
-    vaccine3 = sum((epi_params.ρˢᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴱᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴬᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴵᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴿᵍᵥ[:, :, t, 3] .+
-                    epi_params.ρᴰᵍᵥ[:, :, t, 3] .+
-                    epi_params.CHᵢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :]) / population.N
-
-    @printf("Time: %d, players: %.2f, sus3: %.2f, cases3: %.2f, deaths: %.2f, vaccine1 = %.2f, vaccine2: %.2f, vaccine3: %.2f\n",
-            t, players, sus3, cases3, deaths, vaccine1, vaccine2, vaccine3 )
-    
-end
 
 """
-Get the time series of different indicators of the epidemic:
- - Infected = I + A
- - Cases = I + A + PD + PH + HD + HR
- - Icus = HR + HD
- - Deaths = D
- - Vaccinated = All the vaccinated compartments
- - Daily cases
-"""
+    update_population_params!(population::Population_Params)
 
-function time_series(epi_params::Epidemic_Params,
-                      population::Population_Params)
-    
-    return (infected = sum((epi_params.ρᴵᵍᵥ[:, :, :, :] .+ 
-                            epi_params.ρᴬᵍᵥ[:, :, :, :]) .* population.nᵢᵍ[:, :], dims=(1,2,4) )[1,1,:,1],
-        
-            cases    = sum((epi_params.ρᴵᵍᵥ[:, :, :, :] .+ 
-                            epi_params.ρᴬᵍᵥ[:, :, :, :] .+
-                            epi_params.ρᴾᴰᵍᵥ[:, :, :, :] .+
-                            epi_params.ρᴾᴴᵍᵥ[:, :, :, :] .+
-                            epi_params.ρᴴᴰᵍᵥ[:, :, :, :] .+
-                            epi_params.ρᴴᴿᵍᵥ[:, :, :, :]) .* population.nᵢᵍ[:, :], dims=(1,2,4) )[1,1,:,1],
-        
-            icus     = sum((epi_params.ρᴴᴿᵍᵥ[:, :, :, :] .+
-                            epi_params.ρᴴᴰᵍᵥ[:, :, :, :]) .* population.nᵢᵍ[:, :], dims=(1,2,4) )[1,1,:,1],
-        
-            deaths   = sum(epi_params.ρᴰᵍᵥ[:, :, :, :] .* population.nᵢᵍ[:, :], dims=(1,2,4) )[1,1,:,1],
-        
-            vaccinated = sum((epi_params.ρˢᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴾᴰᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴱᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴬᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴵᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴾᴴᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴴᴰᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴴᴿᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴿᵍᵥ[:, :, :, 2:3] .+
-                              epi_params.ρᴰᵍᵥ[:, :, :, 2:3] ) .* population.nᵢᵍ[:, :], dims=(1,2,4) )[1,1,:,1]
-        
-        )
-end    
-
-"""
-    Function whose purpose is to find all the local maxima in a vector. The output is a list of two vectors, one containing all the heights 
-    of said maxima, the other containing all the positions
-"""
-
-function maxima(v)
-    h = []
-    p = []
-    idx = 1
-    for i in 2:(length(v)-2)
-        condition = (v[i-1] < v[i]) & (v[i] > v[i+1])
-        # condition2 = (v[maximum([i-50, 1])] < v[i]) | (v[i] > v[minimum([length(v), i+50])])
-        if condition #& condition2
-           h = append!( h, v[i] )
-           p = append!( p, i)
-           idx = idx + 1 
-        end
-    end
-    return (height = h ,
-            position = p)
-end
-
-
-"""
-    optimal_vaccination_distribution(ϵᵍ::Array{Float64, 1},
-                                     ρˢᵍᵥ::Array{Float64, 4},
-                                     nᵢᵍ::Array{Float64, 2},
-                                     t::Int64)
-
-Computes the number of vaccines that should be distributed among spatial patches and 
-age strata taking into account where the majority of the unvaccinated susceptibles 
-are and what age stratum should have the priority.
+Update population parameters, computing the effective populations and the
+normalization parameter z if p and k are modified.
 
 # Arguments
+  - `population::Population_Params`: Structure that contains all the parameters related with the population.
+"""
+function update_population_params!(population::Population_Params)
 
-- ϵᵍ : the absolute number of vaccines at our disposal per day, divided among age strata
-- ρˢᵍᵥ: fraction of susceptible individuals
-- nᵢᵍ: absolute number of people per age in each age strata (rows) and patches (colums)
-- t: current day
+    # Reset effective population
+    population.nᵢᵍ_eff[:,:]    .= (1 .- population.pᵍ_eff) .* population.nᵢᵍ
+    population.nᵢ_eff[:]       .= zeros(Float64, population.M)
+    population.mobilityᵍ[:, :] .= 0.
+
+    # Init. normalization vector
+    population.zᵍ .= 0.
+    population.normᵍ[:, :] .= 0.
+
+    # Compute effective population
+    compute_effective_population!(population.nᵢᵍ_eff,
+                                  population.nᵢ_eff,
+                                  population.nᵢᵍ,
+                                  population.Nᵍ,
+                                  population.mobilityᵍ,
+                                  population.kᵍ_eff,
+                                  population.zᵍ,
+                                  population.normᵍ,
+                                  population.ξ,
+                                  population.pᵍ_eff,
+                                  population.sᵢ,
+                                  population.edgelist,
+                                  population.Rᵢⱼ,
+                                  population.M,
+                                  population.G)
+end
+
 
 """
+    compute_effective_population!(nᵢᵍ_eff::Array{Float64, 2},
+                                  nᵢ_eff::Array{Float64, 1},
+                                  nᵢᵍ::Array{Float64, 2},
+                                  Nᵍ::Array{Int64, 1},
+                                  mobilityᵍ::Array{Float64, 2},
+                                  kᵍ_eff::Array{Float64, 1},
+                                  zᵍ::Array{Float64, 1},
+                                  normᵍ::Array{Float64, 2},
+                                  ξ::Float64,
+                                  pᵍ_eff::Array{Float64, 1},
+                                  sᵢ::Array{Float64, 1},
+                                  edgelist::Array{Int64, 2},
+                                  Rᵢⱼ::Array{Float64, 1},
+                                  M::Int64,
+                                  G::Int64)
 
-function optimal_vaccination_distribution(ϵᵍ::Array{Float64, 1},
-                                          ρˢᵍᵥ::Array{Float64, 4},
-                                          nᵢᵍ::Array{Float64, 2},
-                                          t::Int64)
-    Nᵥ = sum(ϵᵍ) # Total number of vaccines
-    (G, M, T, V) = size(ρˢᵍᵥ)
-    (G, M) = size(nᵢᵍ)
+Compute the effective population at each patch.
+"""
+function compute_effective_population!(nᵢᵍ_eff::Array{Float64, 2},
+                                       nᵢ_eff::Array{Float64, 1},
+                                       nᵢᵍ::Array{Float64, 2},
+                                       Nᵍ::Array{Int64, 1},
+                                       mobilityᵍ::Array{Float64, 2},
+                                       kᵍ_eff::Array{Float64, 1},
+                                       zᵍ::Array{Float64, 1},
+                                       normᵍ::Array{Float64, 2},
+                                       ξ::Float64,
+                                       pᵍ_eff::Array{Float64, 1},
+                                       sᵢ::Array{Float64, 1},
+                                       edgelist::Array{Int64, 2},
+                                       Rᵢⱼ::Array{Float64, 1},
+                                       M::Int64,
+                                       G::Int64)
 
-    if Nᵥ == 0
-        @info "No vaccination"
-        return zeros(G, M)
-    end
-    
-    
-    only_positive = true
-    for v in 1:V
-        only_positive = only_positive & all(ρˢᵍᵥ[:, :, t, v] .>= 0.0) & all(ρˢᵍᵥ[:, :, t, v] .<= 1.0)
-    end
-        
-    if any(ϵᵍ .< 0)
-        @printf("\n ----------------------------- \n ATTENZIONE: Number of dosis is negative \n ----------------------------- ")
-        return
-    end
-    
-    if !only_positive
-        @printf("ATTENZIONE: Fraction of susceptible is not between 0 and 1")
-        return
-    end
-    
-    ###############################
-    
-    if ( ( Nᵥ != 0) & (sum(ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ) > Nᵥ) ) 
-         
-        # Define a matrix that gives you the priority of each patch and age group...
-        priority_ϵ =  nᵢᵍ .* ( reshape(repeat(ϵᵍ, M), (G,M) ) )
-        priority_ϵ = priority_ϵ / (sum(priority_ϵ) == 0 ? 1 : sum(priority_ϵ) )
-        # ... and use the priority matrix to define how many dosis each subgroup get
-        ϵᵢᵍ = Nᵥ * priority_ϵ
-        
-        # Define index that tells you if and where there are more susceptibles than vaccines
-        idx_ϵ = ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ .- ϵᵢᵍ
+    # Compute the effective population for each strata and patch
+    for indx_e in 1:size(edgelist)[1]
+        i = edgelist[indx_e, 1]
+        j = edgelist[indx_e, 2]
 
-        # Redistribution of vaccines: If there is one location and age group that has more vaccines than susceptibles the number 
-        # of vaccines in that compartment is set equal to the number of susceptibles and the spare dosis are restributed among the others
-        while ( !prod(idx_ϵ .>= 0 ) )   
-            ϵᵢᵍ = ϵᵢᵍ .* (idx_ϵ .> 0)
-            ϵᵢᵍ .* (idx_ϵ .<= 0) .= ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ .* (idx_ϵ .<= 0)
-            Nᵥ_new = Nᵥ - sum(nᵢᵍ .* (idx_ϵ .<= 0) )
-            
-            # Redifine priority levels
-            priority_ϵ =  nᵢᵍ .* ϵᵢᵍ 
-            priority_ϵ = priority_ϵ / (sum(priority_ϵ) == 0 ? 1 : sum(priority_ϵ) )
-            ϵᵢᵍ .* (idx_ϵ .> 0) .= Nᵥ_new * priority_ϵ
-            
-#             ϵᵢᵍ = ϵᵢᵍ / sum(ϵᵢᵍ) * ( Nᵥ - sum(nᵢᵍ[idx_ϵ .<= 0])  )
-            
-            idx_ϵ = ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ  .-  ϵᵢᵍ[:, :] 
+        for g in 1:G
+            nᵢᵍ_eff[g, j] += pᵍ_eff[g] * Rᵢⱼ[indx_e] * nᵢᵍ[g, i]
         end
-        
-    elseif ( (Nᵥ != 0) & (sum(ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ) <= Nᵥ)  )
-        ϵᵢᵍ = ρˢᵍᵥ[:,:,t,1] .* nᵢᵍ
-    else
-        ϵᵢᵍ = zeros(G, M)
     end
-    
-    return ϵᵢᵍ
 
+    # Compute the aggregated effective population
+    for i in 1:M
+        for g in 1:G
+            nᵢ_eff[i] += nᵢᵍ_eff[g, i]
+        end
+    end
+
+    # Correction for populations without effective population
+    for i in 1:M
+        if nᵢ_eff[i] == 0.
+            nᵢ_eff[i] = 1e-7
+        end
+        for g in 1:G
+            if nᵢᵍ_eff[g, i] == 0.
+                nᵢᵍ_eff[g, i] = 1e-7
+            end
+        end
+    end
+
+    # Compute the normalization vector
+    for g in 1:G
+        zᵍ[g] = kᵍ_eff[g] * Nᵍ[g] /
+            sum((2 .- exp.(-ξ .* nᵢ_eff ./ sᵢ)) .* nᵢᵍ_eff[g, :]);
+    end
+
+    # Update the precomuted matrices
+    for indx_e in 1:length(Rᵢⱼ)
+        i = edgelist[indx_e, 1]
+        j = edgelist[indx_e, 2]
+        for g in 1:G
+            mobilityᵍ[g, indx_e] = nᵢᵍ[g, i] *
+                ((1 - pᵍ_eff[g]) * (i == j ? 1. : 0.) + pᵍ_eff[g] * Rᵢⱼ[indx_e] )
+        end
+    end
+
+    for i in 1:M
+        for g in 1:G
+            normᵍ[g, i] = zᵍ[g] * (2 - exp(-ξ * nᵢ_eff[i] / sᵢ[i]))
+        end
+    end
 end
 
 
@@ -582,24 +475,22 @@ variables stored in epi_params. It also provides, through optional arguments,
 the application of a containmnet or a vaccination campaign on a specific date.
 
 # Arguments
-
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
+    - `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+    and the epidemic spreading information.
+    - `population::Population_Params`: Structure that contains all the parameters
+    related with the population.
 
 ## Optional
-
-- `tᶜ::Int64 = -1`: Timestep of application of containment, or out of timesteps range
-  value for no containment.
-- `tᵛ::Int64 = -1`: Timestep of application of vaccination.
-- `κ⁰::Float64 = 0.0`: Mobility reduction.
-- `ϕ::Float64 = 1.0`: Permeability of confined households.
-- `δ::Float64 = 0.0`: Social Distancing.
-- `ϵᵍ::Array{Float64, 1} = [0., 0., 0.]`: Number of vaccines for each age group
-- `t₀::Int64 = 1`: Initial timestep.
-- `verbose::Bool = false`: If `true`, prints useful information about the
-  evolution of the epidemic process.
+    - `tᶜ::Int64 = -1`: Timestep of application of containment, or out of timesteps range
+    value for no containment.
+    - `tᵛ::Int64 = -1`: Timestep of application of vaccination.
+    - `κ⁰::Float64 = 0.0`: Mobility reduction.
+    - `ϕ::Float64 = 1.0`: Permeability of confined households.
+    - `δ::Float64 = 0.0`: Social Distancing.
+    - `ϵᵍ::Array{Float64, 1} = [0., 0., 0.]`: Number of vaccines for each age group
+    - `t₀::Int64 = 1`: Initial timestep.
+    - `verbose::Bool = false`: If `true`, prints useful information about the
+    evolution of the epidemic process.
 """
 function run_epidemic_spreading_mmca!(epi_params::Epidemic_Params,
                                       population::Population_Params,
@@ -641,23 +532,20 @@ variables stored in epi_params. It provides the option of the application
 of multiple different containmnets or vaccination campaigns at specific dates.
 
 # Arguments
-
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
-- `tᶜs::Array{Int64, 1}`: List of timesteps of application of containments.
-- `tᵛs::Int64 = -1`: Timestep of application of vaccination.
-- `κ⁰s::Array{Float64, 1}`: List of mobility reductions.
-- `ϕs::Array{Float64, 1}`: List of permeabilities of confined households.
-- `δs::Array{Float64, 1}`: List of social distancings.
-- `ϵᵍs::Array{Float64, 2}`: List of dosis per age group of each time period
+    - `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+    and the epidemic spreading information.
+    - `population::Population_Params`: Structure that contains all the parameters
+    related with the population.
+    - `tᶜs::Array{Int64, 1}`: List of timesteps of application of containments.
+    - `tᵛs::Int64 = -1`: Timestep of application of vaccination.
+    - `κ⁰s::Array{Float64, 1}`: List of mobility reductions.
+    - `ϕs::Array{Float64, 1}`: List of permeabilities of confined households.
+    - `δs::Array{Float64, 1}`: List of social distancings.
+    - `ϵᵍs::Array{Float64, 2}`: List of dosis per age group of each time period
 
 ## Optional
-
-- `t₀::Int64 = 1`: Initial timestep.
-- `verbose::Bool = false`: If `true`, prints useful information about the
-  evolution of the epidemic process.
+    - `t₀::Int64 = 1`: Initial timestep.
+    - `verbose::Bool = false`: If `true`, prints useful information about the evolution of the epidemic process.
 """
 function run_epidemic_spreading_mmca!(epi_params::Epidemic_Params,
                                       population::Population_Params,

@@ -3,77 +3,70 @@
 ## ----------------------------------------------------------------------------
 
 """
-    Epidemic_Params
-
-Struct that contains the parameters related with the epidemic parameters and
-compartmental evolution.
+Epidemic_Params
+  Struct that contains the parameters related with the epidemic parameters and compartmental evolution.
 
 # Fields
-
-All the parameters contained in this structure are probabilities ranged between
-0 and 1.
+  All the parameters contained in this structure are probabilities ranged between 0 and 1.
 
 # Epidemic parameters
-
-- `βᴵ::Array{Float64, 1}`: Infectivity of infected.
-- `βᴬ::Array{Float64, 1}`: Infectivity of asymptomatic.
-- `ηᵍ::Array{Float64, 1}`: Exposed rate for each strata.
-- `αᵍ::Array{Float64, 1}`: Asymptomatic infectious rate for each strata.
-- `μᵍ::Array{Float64, 1}`: Infectious rate for each strata.
-- `θᵍ::Array{Float64, 2}`: Direct death probability for each strata.
-- `γᵍ::Array{Float64, 2}`: ICU probability for each strata.
-- `ζᵍ::Array{Float64, 1}`: Pre-deceased rate for each strata.
-- `λᵍ::Array{Float64, 1}`: Pre-hospitalized in ICU rate for each strata.
-- `ωᵍ::Array{Float64, 2}`: Fatality probability in ICU for each strata.
-- `ψᵍ::Array{Float64, 1}`: Death rate in iCU for each strata.
-- `χᵍ::Array{Float64, 1}`: ICU discharge rate for each strata.
-- `Λ::Float64`: Probability of losing the vaccine-acquired immunity
-- `Γ::Float64`: Probability of losing the disease-acquired immunity
-- `T::Int64`: Number of epidemic timesteps.
-- `V::Int64`: Number of stages in the vaccination process
-- `NumComps::Int64`: Number of epidemiological compartments
-- `rᵥ::Array{Float64, 1}`: Vaccine efficacy in preventing infections
-- `kᵥ::Array{Float64, 1}`: Vaccine efficacy in preventing tranmission
+  - `βᴵ::Array{Float64, 1}`: Infectivity of infected.
+  - `βᴬ::Array{Float64, 1}`: Infectivity of asymptomatic.
+  - `ηᵍ::Array{Float64, 1}`: Exposed rate for each strata.
+  - `αᵍ::Array{Float64, 1}`: Asymptomatic infectious rate for each strata.
+  - `μᵍ::Array{Float64, 1}`: Infectious rate for each strata.
+  - `θᵍ::Array{Float64, 2}`: Direct death probability for each strata.
+  - `γᵍ::Array{Float64, 2}`: ICU probability for each strata.
+  - `ζᵍ::Array{Float64, 1}`: Pre-deceased rate for each strata.
+  - `λᵍ::Array{Float64, 1}`: Pre-hospitalized in ICU rate for each strata.
+  - `ωᵍ::Array{Float64, 2}`: Fatality probability in ICU for each strata.
+  - `ψᵍ::Array{Float64, 1}`: Death rate in iCU for each strata.
+  - `χᵍ::Array{Float64, 1}`: ICU discharge rate for each strata.
+  - `Λ::Float64`: Probability of losing the vaccine-acquired immunity
+  - `Γ::Float64`: Probability of losing the disease-acquired immunity
+  - `T::Int64`: Number of epidemic timesteps.
+  - `V::Int64`: Number of stages in the vaccination process
+  - `NumComps::Int64`: Number of epidemiological compartments
+  - `rᵥ::Array{Float64, 1}`: Vaccine efficacy in preventing infections
+  - `kᵥ::Array{Float64, 1}`: Vaccine efficacy in preventing tranmission
 
 # Compartmental evolution
-
-- `ρˢᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of suceptible individuals for each
-  strata, patch and vaccination status.
-- `ρᴱᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of exposed individuals for each
-  strata, patch and vaccination status.
-- `ρᴬᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of asymptomatic individuals for
-  each strata, patch and vaccination status.
-- `ρᴵᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of symptomatic individuals for each
-  strata, patch and vaccination status.
-- `ρᴾᴴᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of pre-hospitalized to ICU
-  individuals for each strata, patch and vaccination status.
-- `ρᴾᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of pre-deceased individuals for each strata, patch 
-  and vaccination status.
-- `ρᴴᴿᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of hospitalized in ICU patients who
-  will recover for each strata, patch and vaccination status.
-- `ρᴴᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of hospitalized in ICU patients who
-  will not recover for each strata, patch and vaccination status.
-- `ρᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of deceased individuals for each
-  strata, patch and vaccination status.
-- `ρᴿᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
-  infomation about the evolution of fraction of recovered individuals for each
-  strata, patch and vaccination status.
+  - `ρˢᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of suceptible individuals for each
+    strata, patch and vaccination status.
+  - `ρᴱᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of exposed individuals for each
+    strata, patch and vaccination status.
+  - `ρᴬᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of asymptomatic individuals for
+    each strata, patch and vaccination status.
+  - `ρᴵᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of symptomatic individuals for each
+    strata, patch and vaccination status.
+  - `ρᴾᴴᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of pre-hospitalized to ICU
+    individuals for each strata, patch and vaccination status.
+  - `ρᴾᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of pre-deceased individuals for each strata, patch 
+    and vaccination status.
+  - `ρᴴᴿᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of hospitalized in ICU patients who
+    will recover for each strata, patch and vaccination status.
+  - `ρᴴᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of hospitalized in ICU patients who
+    will not recover for each strata, patch and vaccination status.
+  - `ρᴰᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of deceased individuals for each
+    strata, patch and vaccination status.
+  - `ρᴿᵍᵥ::Array{Float64, 4}`: Matrix of size ``G \\times M \\times T \\times V`` containing
+    infomation about the evolution of fraction of recovered individuals for each
+    strata, patch and vaccination status.
 
 # Auxiliary
-
-- `CHᵢᵍᵥ::Array{Float64, 3}`: Fraction of securely confined individuals for each
-  strata and patch.
-- `Qᵢᵍ::Array{Float64, 3}`: Suceptible contacts available for each strata on a
-  given patch.
+  - `CHᵢᵍᵥ::Array{Float64, 3}`: Fraction of securely confined individuals for each
+    strata and patch.
+  - `Qᵢᵍ::Array{Float64, 3}`: Suceptible contacts available for each strata on a
+    given patch.
 
 """
 struct Epidemic_Params
@@ -151,39 +144,38 @@ end
                     V::Int64)
 
 # Arguments
-
-- `βᴵ::Float64`: Infectivity of infected for each vaccination status.
-- `βᴬ::Float64`: Infectivity of asymptomatic for each vaccination status.
-- `ηᵍ::Array{Float64, 1}`: Vector of size ``G`` with exposed rates for each
-  strata.
-- `αᵍ::Array{Float64, 1}`: Vector of size ``G`` with asymptomatic infectious
-  rates for each strata.
-- `μᵍ::Array{Float64, 1}`: Vector of size ``G`` with infectious rates for each
-  strata.
-- `θᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with direct death probabilities
-  for each strata.
-- `γᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with ICU probabilities for each
-  strata.
-- `ζᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-deceased rates for
-  each strata.
-- `λᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-hospitalized in ICU
-  rates for each strata.
-- `ωᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with fatality probabilities in
-  ICU for each strata.
-- `ψᵍ::Array{Float64, 1}`: Vector of size ``G`` with death rates for each
-  strata.
-- `χᵍ::Array{Float64, 1}`: Vector of size ``G`` with ICU discharge rates for
-  each strata.
-- `Λ::Float64`: Probability of losing the vaccine-acquired immunity
-- `Γ::Float64`: Probability of losing the disease-acquired immunity
-- `rᵥ::Array{Float64, 1}`: Vector of size ``V``. Vaccine efficacy in preventing infections 
-   for each vaccination status.
-- `kᵥ::Array{Float64, 1}`: Vector of size ``V``. Vaccine efficacy in preventing tranmission 
-   for each vaccination status.
-- `G::Int64`: Number of strata.
-- `M::Int64`: Number of patches.
-- `T::Int64`: Number of epidemic timesteps.
-- `V::Int64`: Number of stages in the vaccination process.
+  - `βᴵ::Float64`: Infectivity of infected for each vaccination status.
+  - `βᴬ::Float64`: Infectivity of asymptomatic for each vaccination status.
+  - `ηᵍ::Array{Float64, 1}`: Vector of size ``G`` with exposed rates for each
+    strata.
+  - `αᵍ::Array{Float64, 1}`: Vector of size ``G`` with asymptomatic infectious
+    rates for each strata.
+  - `μᵍ::Array{Float64, 1}`: Vector of size ``G`` with infectious rates for each
+    strata.
+  - `θᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with direct death probabilities
+    for each strata.
+  - `γᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with ICU probabilities for each
+    strata.
+  - `ζᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-deceased rates for
+    each strata.
+  - `λᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-hospitalized in ICU
+    rates for each strata.
+  - `ωᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with fatality probabilities in
+    ICU for each strata.
+  - `ψᵍ::Array{Float64, 1}`: Vector of size ``G`` with death rates for each
+    strata.
+  - `χᵍ::Array{Float64, 1}`: Vector of size ``G`` with ICU discharge rates for
+    each strata.
+  - `Λ::Float64`: Probability of losing the vaccine-acquired immunity
+  - `Γ::Float64`: Probability of losing the disease-acquired immunity
+  - `rᵥ::Array{Float64, 1}`: Vector of size ``V``. Vaccine efficacy in preventing infections 
+    for each vaccination status.
+  - `kᵥ::Array{Float64, 1}`: Vector of size ``V``. Vaccine efficacy in preventing tranmission 
+    for each vaccination status.
+  - `G::Int64`: Number of strata.
+  - `M::Int64`: Number of patches.
+  - `T::Int64`: Number of epidemic timesteps.
+  - `V::Int64`: Number of stages in the vaccination process.
 
 # Return
 
@@ -237,7 +229,6 @@ function Epidemic_Params(βᴵ::Float64,
 end
 
 
-
 function update_epidemic_params!(epi_params::Epidemic_Params, data_dict::Dict{String, Any})
   # has_key(key) = haskey(data_dict, key) && !(typeof(getfield(person, Symbol(key))) <: Union{Missing, Nothing})
   epi_params.βᴵ = has_key("βᴵ") ? data_dict["βᴵ"] : epi_params.βᴵ
@@ -260,14 +251,13 @@ end
 
 
 """
-    reset_epidemic_params!(epi_params::Epidemic_Params)
-
+    reset_epidemic_compartments!(epi_params::Epidemic_Params)
 Reset the ρ's to reuse the structure and avoid additional allocations.
 
 # Arguments
 - `epi_params::Epidemic_Params`: structure to reset.
 """
-function reset_epidemic_params!(epi_params::Epidemic_Params)
+function reset_epidemic_compartments!(epi_params::Epidemic_Params)
     epi_params.ρˢᵍᵥ .= 0.
     epi_params.ρˢᵍᵥ[:, :, :, 1] .= 1.
     epi_params.ρᴱᵍᵥ  .= 0.
@@ -287,86 +277,49 @@ function reset_epidemic_params!(epi_params::Epidemic_Params)
     nothing
 end
 
-"""
-VACCINATION PARAMETERS
-
-Struct that contains the parameters related with vaccination 
-strageties
-
-#Parameters
-  - ϵᵍ: total vaccinations per age strata
-  - tᵛs: 
-  - ϵᵍs:
-
-"""
-
-
-
-"""
-CONTAINMENT PARAMETERS
-
-Struct that contains the parameters related with containement
-measures
-
-#Parameters
-  - κ₀s:Array{Float64, 1}: Array of level of confinement
-  - ϕs:Array{Float64, 1}: Array of permeabilities of confined households
-  - δs:Array{Float64, 1}: Array of social distancing measures
-  - tᶜs:Array{Int64, 1}: Timesteps when the containment measures will be applied
-"""
-
-struct NPI_Params
-    κ₀s::Array{Float64, 1}
-    ϕs::Array{Float64, 1}
-    δs::Array{Float64, 1}
-    tᶜs::Array{Int64, 1}
-end
-
-
-  ### ----------------------------------------------------------------------------
+### ----------------------------------------------------------------------------
 ### PATCH AND POPULATION RELATED FUNCTIONS
 ### ----------------------------------------------------------------------------
 
 """
-    Population_Params
+Population_Params
 
 Struct that contains the parameters related with geographical, population and
 mobility data.
 
 # Fields
-
-- `G::Int64`: Number of population strata.
-- `M::Int64`: Number of patches.
-- `nᵢ:Array{Float64, 1}`: Population of each patch.
-- `nᵢᵍ:Array{Float64, 2}`: Population of each strata on each patch.
-- `nᵢ_eff:Array{Float64, 1}`: Effective population on each patch after taking
-  into account mobility.
-- `nᵢᵍ_eff:Array{Float64, 1}`: Effective population of each strata on each patch
-  after taking into account mobility.
-- `N::Int64`: Total population.
-- `Nᵍ::Array{Int64, 1}`: Total population of each strata.
-- `pᵍ::Array{Float64, 1}`: Vector with the degree of mobility of each strata.
-- `pᵍ_eff::Array{Float64, 1}`: Vector with the current degree of mobility of
-  each strata.
-- `edgelist::Array{Int64, 2}`: Matrix with the directed edgelist between
-  patches, where ``L`` is the number of edges.
-- `Rᵢⱼ::Array{Float64, 1}`: Vector with the transition probabilities for each
-  edge in the edgelist.
-- `mobilityᵍ::Array{Float64, 1}`: Effective mobility of each strata between
-  patches (used to optimize performance).
-- `kᵍ::Array{Float64, 1}`: Average number of contacts of each strata.
-- `kᵍ_h::Array{Float64, 1}`: Average number of contacts at home of each strata.
-- `kᵍ_w::Array{Float64, 1}`: Average number of contacts at work of each strata.
-- `kᵍ_eff::Array{Float64, 1}`: Current average number of contacts of each
-  strata.
-- `C::Array{Float64, 2}`: Matrix with the probability of contact between
-  different stratifications.
-- `zᵍ::Array{Float64, 1}`: Nomalization factor each strata.
-- `normᵍ::Array{Float64, 2}`: Normalization of each strata (used to optimize
-  performance).
-- `sᵢ::Array{Float64, 1}`: Surface of each patch.
-- `ξ::Float64`: Densisty factor.
-- `σ::Float64`: Average household size.
+  - `G::Int64`: Number of population strata.
+  - `M::Int64`: Number of patches.
+  - `nᵢ:Array{Float64, 1}`: Population of each patch.
+  - `nᵢᵍ:Array{Float64, 2}`: Population of each strata on each patch.
+  - `nᵢ_eff:Array{Float64, 1}`: Effective population on each patch after taking
+    into account mobility.
+  - `nᵢᵍ_eff:Array{Float64, 1}`: Effective population of each strata on each patch
+    after taking into account mobility.
+  - `N::Int64`: Total population.
+  - `Nᵍ::Array{Int64, 1}`: Total population of each strata.
+  - `pᵍ::Array{Float64, 1}`: Vector with the degree of mobility of each strata.
+  - `pᵍ_eff::Array{Float64, 1}`: Vector with the current degree of mobility of
+    each strata.
+  - `edgelist::Array{Int64, 2}`: Matrix with the directed edgelist between
+    patches, where ``L`` is the number of edges.
+  - `Rᵢⱼ::Array{Float64, 1}`: Vector with the transition probabilities for each
+    edge in the edgelist.
+  - `mobilityᵍ::Array{Float64, 1}`: Effective mobility of each strata between
+    patches (used to optimize performance).
+  - `kᵍ::Array{Float64, 1}`: Average number of contacts of each strata.
+  - `kᵍ_h::Array{Float64, 1}`: Average number of contacts at home of each strata.
+  - `kᵍ_w::Array{Float64, 1}`: Average number of contacts at work of each strata.
+  - `kᵍ_eff::Array{Float64, 1}`: Current average number of contacts of each
+    strata.
+  - `C::Array{Float64, 2}`: Matrix with the probability of contact between
+    different stratifications.
+  - `zᵍ::Array{Float64, 1}`: Nomalization factor each strata.
+  - `normᵍ::Array{Float64, 2}`: Normalization of each strata (used to optimize
+    performance).
+  - `sᵢ::Array{Float64, 1}`: Surface of each patch.
+  - `ξ::Float64`: Densisty factor.
+  - `σ::Float64`: Average household size.
 
 # Constructor
 
@@ -418,34 +371,31 @@ end
 Constructor of the struct [`Population_Params`](@ref).
 
 # Arguments
-
-- `G::Int64`: Number of population strata.
-- `M::Int64`: Number of patches.
-- `nᵢᵍ::Array{Float64, 2}`: Matrix of size ``G \\times M`` with the population
-  at each strata and patch.
-- `kᵍ::Array{Float64, 1}`: Vector of size ``G`` with the average number of
-  contacts of each strata.
-- `kᵍ_h::Array{Float64, 1}`: Vector of size ``G`` with the average number of
-  contacts at home of each strata.
-- `kᵍ_w::Array{Float64, 1}`: Vector of size ``G`` with the average number of
-  contacts at work of each strata.
-- `C::Array{Float64, 2}`: Matrix of size ``G \\times G`` with the probability of
-  contact between different stratifications.
-- `pᵍ::Array{Float64, 1}`: Vector of size ``G`` with the degree of mobility of
-  each strata ranged between 0 and 1.
-- `edgelist::Array{Int64, 2}`: Matrix of size ``L \\times 2`` containing the
-  directed edgelist between patches, where ``L`` is the number of edges. The IDs
-  of the patches have to go from ``1`` to ``M``.
-- `Rᵢⱼ::Array{Float64, 1}`: Vector of size ``L`` containing the transition
-  probabilities for each edge in the edgelist.
-- `sᵢ::Array{Float64, 1}`: Vector of size `M` with the surface of each patch.
-- `ξ::Float64`: Density factor.
-- `σ::Float64`: Average household size.
+  - `G::Int64`: Number of population strata.
+  - `M::Int64`: Number of patches.
+  - `nᵢᵍ::Array{Float64, 2}`: Matrix of size ``G \\times M`` with the population
+    at each strata and patch.
+  - `kᵍ::Array{Float64, 1}`: Vector of size ``G`` with the average number of
+    contacts of each strata.
+  - `kᵍ_h::Array{Float64, 1}`: Vector of size ``G`` with the average number of
+    contacts at home of each strata.
+  - `kᵍ_w::Array{Float64, 1}`: Vector of size ``G`` with the average number of
+    contacts at work of each strata.
+  - `C::Array{Float64, 2}`: Matrix of size ``G \\times G`` with the probability of
+    contact between different stratifications.
+  - `pᵍ::Array{Float64, 1}`: Vector of size ``G`` with the degree of mobility of
+    each strata ranged between 0 and 1.
+  - `edgelist::Array{Int64, 2}`: Matrix of size ``L \\times 2`` containing the
+    directed edgelist between patches, where ``L`` is the number of edges. The IDs
+    of the patches have to go from ``1`` to ``M``.
+  - `Rᵢⱼ::Array{Float64, 1}`: Vector of size ``L`` containing the transition
+    probabilities for each edge in the edgelist.
+  - `sᵢ::Array{Float64, 1}`: Vector of size `M` with the surface of each patch.
+  - `ξ::Float64`: Density factor.
+  - `σ::Float64`: Average household size.
 
 # Return
-
-Struct that contains the parameters related with geographical, population and
-mobility data.
+  - Struct that contains the parameters related with geographical, population and mobility data.
 """
 function Population_Params(G::Int64,
                            M::Int64,
@@ -488,143 +438,260 @@ function Population_Params(G::Int64,
 end
 
 
-"""
-    update_population_params!(population::Population_Params)
 
-Update population parameters, computing the effective populations and the
-normalization parameter z if p and k are modified.
+"""
+    reset_params!(epi_params::Epidemic_Params,
+                  population::Population_Params)
+
+Reset the epidemic and population parameters to reuse the structure and avoid
+additional data allocations.
 
 # Arguments
-- `population::Population_Params`: Structure that contains all the parameters
+  - `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+    and the epidemic spreading information.
+  - `population::Population_Params`: Structure that contains all the parameters
   related with the population.
 """
-function update_population_params!(population::Population_Params)
+function reset_params!(epi_params::Epidemic_Params,
+                       population::Population_Params)
 
-    # Reset effective population
-    population.nᵢᵍ_eff[:,:] .= (1 .- population.pᵍ_eff) .* population.nᵢᵍ
-    population.nᵢ_eff[:] .= zeros(Float64, population.M)
-    population.mobilityᵍ[:, :] .= 0.
+    reset_epidemic_params!(epi_params)
+    population.pᵍ_eff .= population.pᵍ
+    population.kᵍ_eff .= population.kᵍ
+    update_population_params!(population)
 
-    # Init. normalization vector
-    population.zᵍ .= 0.
-    population.normᵍ[:, :] .= 0.
+end
 
-    # Compute effective population
-    compute_effective_population!(population.nᵢᵍ_eff,
-                                  population.nᵢ_eff,
-                                  population.nᵢᵍ,
-                                  population.Nᵍ,
-                                  population.mobilityᵍ,
-                                  population.kᵍ_eff,
-                                  population.zᵍ,
-                                  population.normᵍ,
-                                  population.ξ,
-                                  population.pᵍ_eff,
-                                  population.sᵢ,
-                                  population.edgelist,
-                                  population.Rᵢⱼ,
-                                  population.M,
-                                  population.G)
+### ---------------------------------------------------------------
+### CONTFINAMENT AND VACCINATION PARAMETERS
+### ---------------------------------------------------------------
+
+
+"""
+Struct that contains the parameters related with containement
+measures
+
+#Parameters
+  - κ₀s:Array{Float64, 1}: Array of level of confinement
+  - ϕs:Array{Float64, 1}: Array of permeabilities of confined households
+  - δs:Array{Float64, 1}: Array of social distancing measures
+  - tᶜs:Array{Int64, 1}: Timesteps when the containment measures will be applied
+"""
+
+struct NPI_Params
+    κ₀s::Array{Float64, 1}
+    ϕs::Array{Float64, 1}
+    δs::Array{Float64, 1}
+    tᶜs::Array{Int64, 1}
+end
+
+
+
+"""
+VACCINATION PARAMETERS
+
+Struct that contains the parameters related with vaccination 
+strageties
+
+#Parameters
+  - ϵᵍ: total vaccinations per age strata
+  - tᵛs: 
+  - ϵᵍs:
+
+"""
+
+
+
+
+### ---------------------------------------------------------------
+### FUNCTION TO INITIALIZE PARAMETER STRUCTS FROM DICTS
+### ---------------------------------------------------------------
+
+function init_pop_param_struct(G::Int64, M::Int64,
+                               G_coords::Array{String, 1},
+                               pop_params_dict::Dict, 
+                               metapop_df::DataFrame,
+                               network_df::DataFrame)
+
+    # Subpopulations' patch surface
+    sᵢ = metapop_df[:, "area"]
+    # Subpopulation by age strata
+    nᵢᵍ = copy(transpose(Array{Float64,2}(metapop_df[:, G_coords])))
+    # Age Contact Matrix
+    C = Float64.(mapreduce(permutedims, vcat, pop_params_dict["C"]))
+    # Average number of contacts per strata
+    kᵍ = Float64.(pop_params_dict["kᵍ"])
+    # Average number of contacts at home per strata
+    kᵍ_h = Float64.(pop_params_dict["kᵍ_h"])
+    # Average number of contacts at work per strata
+    kᵍ_w = Float64.(pop_params_dict["kᵍ_w"])
+    # Degree of mobility per strata
+    pᵍ = Float64.(pop_params_dict["pᵍ"])
+    # Density factor
+    ξ = pop_params_dict["σ"]
+    # Average household size
+    σ = pop_params_dict["σ"]
+
+    edgelist = Array{Int64, 2}(network_df[:, 1:2])
+    Rᵢⱼ      = copy(network_df[:, 3])
+    edgelist, Rᵢⱼ = correct_self_loops(edgelist, Rᵢⱼ, M)
+    pop_params    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
+
+    return pop_params
+end
+
+function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
+                                    G_coords::Array{String, 1}, 
+                                    epi_params_dict::Dict)
+
+    # Scaling of the asymptomatic infectivity
+    scale_β = epi_params_dict["scale_β"]
+    # Infectivity of Symptomatic
+    βᴵ = epi_params_dict["βᴵ"]
+    # Infectivity of Asymptomatic
+    if haskey(epi_params_dict, "βᴬ")
+        βᴬ = epi_params_dict["βᴬ"]
+    elseif haskey(epi_params_dict, "scale_β")
+        βᴬ = scale_β * βᴵ
+    else
+        @error "Either βᴬ or scale_β should be provided"
+    end
+    # Exposed rate
+    ηᵍ = Float64.(epi_params_dict["ηᵍ"])
+    # Asymptomatic rate
+    αᵍ = Float64.(epi_params_dict["αᵍ"])
+    # Infectious rate
+    μᵍ = Float64.(epi_params_dict["μᵍ"])
+
+    # Waning immunity rate 
+    Λ = epi_params_dict["Λ"] 
+    # Reinfection rate
+    Γ = epi_params_dict["Γ"] 
+
+
+    ## EPIDEMIC PARAMETERS TRANSITION RATES VACCINATION
+
+    # Direct death probability
+    θᵍ = Float64.(reduce(hcat, [epi_params_dict["θᵍ"], epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"], 
+                                epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"]]) )
+    # Hospitalization probability
+    γᵍ = Float64.(reduce(hcat, [epi_params_dict["γᵍ"], epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"],
+                                epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"]]) )
+    # Fatality probability in ICU
+    ωᵍ = Float64.(reduce(hcat, [epi_params_dict["ωᵍ"], epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"], 
+                                epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"]]) )
+    # Pre-deceased rate
+    ζᵍ = Float64.(epi_params_dict["ζᵍ"])
+    # Pre-hospitalized in ICU rate
+    λᵍ = Float64.(epi_params_dict["λᵍ"])
+    # Death rate in ICU
+    ψᵍ = Float64.(epi_params_dict["ψᵍ"])
+    # ICU discharge rate
+    χᵍ = Float64.(epi_params_dict["χᵍ"])
+    # Relative risk reduction of the probability of infection
+    rᵥ = Float64.(epi_params_dict["rᵥ"])
+    # Relative risk reduction of the probability of transmission
+    kᵥ = Float64.(epi_params_dict["kᵥ"])
+
+    return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
+end
+
+function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, kappa0_filename::String, first_day::Date)
+    if !isnothing(kappa0_filename)
+        kappa0_filename = joinpath(data_path, kappa0_filename)
+        @info "- Loading κ₀ time series from $(kappa0_filename)"
+        κ₀_df = CSV.read(kappa0_filename, DataFrame);
+        # syncronize containment measures with simulation
+        @info "- Synchronizing to dates"
+        κ₀_df.time = map(x -> (x .- first_day).value + 1, κ₀_df.date)
+        # Timesteps when the containment measures will be applied
+        tᶜs = κ₀_df.time[:]
+        # Array of level of confinement
+        κ₀s = κ₀_df.reduction[:]
+        # Array of premeabilities of confined households
+        
+        ϕs_aux = Float64.(npi_params_dict["ϕs"])
+        δs_aux = Float64.(npi_params_dict["δs"])
+
+        #Supposing ϕs and δs are constant, while the confinement measures are applied
+        ϕs = fill(ϕs_aux[1], length(tᶜs))
+        δs = fill(δs_aux[1], length(tᶜs))
+
+    else
+        # Timesteps when the containment measures will be applied
+        tᶜs = npi_params_dict["tᶜs"]
+        # Array of level of confinement
+        κ₀s = npi_params_dict["κ₀s"]
+        # Array of premeabilities of confined households
+        ϕs = npi_params_dict["ϕs"]
+        # Array of social distancing measures
+        δs = npi_params_dict["δs"]
+    end
+
+    return NPI_Params(κ₀s, ϕs, δs, tᶜs)
+    
+end
+
+
+### ---------------------------------------------------------------
+### FUNCTION TO SET INITIAL CONDITIONS
+### ---------------------------------------------------------------
+
+function set_compartments!(epi_params, population, 
+                            initial_compartments; normalize=true)
+    V = epi_params.V
+    # Index of the initial condition
+    t₀ = 1
+    if normalize
+        for i in 1:V
+            epi_params.ρˢᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 1] ./ population.nᵢᵍ
+            epi_params.ρᴱᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 2] ./ population.nᵢᵍ
+            epi_params.ρᴬᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 3] ./ population.nᵢᵍ
+            epi_params.ρᴵᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 4] ./ population.nᵢᵍ
+            epi_params.ρᴾᴴᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 5] ./ population.nᵢᵍ
+            epi_params.ρᴾᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 6] ./ population.nᵢᵍ
+            epi_params.ρᴴᴿᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 7] ./ population.nᵢᵍ
+            epi_params.ρᴴᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 8] ./ population.nᵢᵍ
+            epi_params.ρᴿᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 9] ./ population.nᵢᵍ
+            epi_params.ρᴰᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 10] ./ population.nᵢᵍ
+        end
+    else
+        for i in 1:V
+            epi_params.ρˢᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 1] 
+            epi_params.ρᴱᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 2] 
+            epi_params.ρᴬᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 3] 
+            epi_params.ρᴵᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 4] 
+            epi_params.ρᴾᴴᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 5] 
+            epi_params.ρᴾᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 6] 
+            epi_params.ρᴴᴿᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 7] 
+            epi_params.ρᴴᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 8] 
+            epi_params.ρᴿᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 9] 
+            epi_params.ρᴰᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 10]
+        end
+    end
+
+    epi_params.ρˢᵍᵥ[isnan.(epi_params.ρˢᵍᵥ)]   .= 0
+    epi_params.ρᴱᵍᵥ[isnan.(epi_params.ρᴱᵍᵥ)]   .= 0
+    epi_params.ρᴬᵍᵥ[isnan.(epi_params.ρᴬᵍᵥ)]   .= 0
+    epi_params.ρᴵᵍᵥ[isnan.(epi_params.ρᴵᵍᵥ)]   .= 0
+    epi_params.ρᴾᴴᵍᵥ[isnan.(epi_params.ρᴾᴴᵍᵥ)] .= 0
+    epi_params.ρᴾᴰᵍᵥ[isnan.(epi_params.ρᴾᴰᵍᵥ)] .= 0
+    epi_params.ρᴴᴿᵍᵥ[isnan.(epi_params.ρᴴᴿᵍᵥ)] .= 0
+    epi_params.ρᴴᴰᵍᵥ[isnan.(epi_params.ρᴴᴰᵍᵥ)] .= 0
+    epi_params.ρᴿᵍᵥ[isnan.(epi_params.ρᴿᵍᵥ)]   .= 0
+    epi_params.ρᴰᵍᵥ[isnan.(epi_params.ρᴰᵍᵥ)]   .= 0
 end
 
 
 """
-    compute_effective_population!(nᵢᵍ_eff::Array{Float64, 2},
-                                  nᵢ_eff::Array{Float64, 1},
-                                  nᵢᵍ::Array{Float64, 2},
-                                  Nᵍ::Array{Int64, 1},
-                                  mobilityᵍ::Array{Float64, 2},
-                                  kᵍ_eff::Array{Float64, 1},
-                                  zᵍ::Array{Float64, 1},
-                                  normᵍ::Array{Float64, 2},
-                                  ξ::Float64,
-                                  pᵍ_eff::Array{Float64, 1},
-                                  sᵢ::Array{Float64, 1},
-                                  edgelist::Array{Int64, 2},
-                                  Rᵢⱼ::Array{Float64, 1},
-                                  M::Int64,
-                                  G::Int64)
-
-Compute the effective population at each patch.
-"""
-function compute_effective_population!(nᵢᵍ_eff::Array{Float64, 2},
-                                       nᵢ_eff::Array{Float64, 1},
-                                       nᵢᵍ::Array{Float64, 2},
-                                       Nᵍ::Array{Int64, 1},
-                                       mobilityᵍ::Array{Float64, 2},
-                                       kᵍ_eff::Array{Float64, 1},
-                                       zᵍ::Array{Float64, 1},
-                                       normᵍ::Array{Float64, 2},
-                                       ξ::Float64,
-                                       pᵍ_eff::Array{Float64, 1},
-                                       sᵢ::Array{Float64, 1},
-                                       edgelist::Array{Int64, 2},
-                                       Rᵢⱼ::Array{Float64, 1},
-                                       M::Int64,
-                                       G::Int64)
-
-    # Compute the effective population for each strata and patch
-    for indx_e in 1:size(edgelist)[1]
-        i = edgelist[indx_e, 1]
-        j = edgelist[indx_e, 2]
-
-        for g in 1:G
-            nᵢᵍ_eff[g, j] += pᵍ_eff[g] * Rᵢⱼ[indx_e] * nᵢᵍ[g, i]
-        end
-    end
-
-    # Compute the aggregated effective population
-    for i in 1:M
-        for g in 1:G
-            nᵢ_eff[i] += nᵢᵍ_eff[g, i]
-        end
-    end
-
-    # Correction for populations without effective population
-    for i in 1:M
-        if nᵢ_eff[i] == 0.
-            nᵢ_eff[i] = 1e-7
-        end
-        for g in 1:G
-            if nᵢᵍ_eff[g, i] == 0.
-                nᵢᵍ_eff[g, i] = 1e-7
-            end
-        end
-    end
-
-    # Compute the normalization vector
-    for g in 1:G
-        zᵍ[g] = kᵍ_eff[g] * Nᵍ[g] /
-            sum((2 .- exp.(-ξ .* nᵢ_eff ./ sᵢ)) .* nᵢᵍ_eff[g, :]);
-    end
-
-    # Update the precomuted matrices
-    for indx_e in 1:length(Rᵢⱼ)
-        i = edgelist[indx_e, 1]
-        j = edgelist[indx_e, 2]
-        for g in 1:G
-            mobilityᵍ[g, indx_e] = nᵢᵍ[g, i] *
-                ((1 - pᵍ_eff[g]) * (i == j ? 1. : 0.) + pᵍ_eff[g] * Rᵢⱼ[indx_e] )
-        end
-    end
-
-    for i in 1:M
-        for g in 1:G
-            normᵍ[g, i] = zᵍ[g] * (2 - exp(-ξ * nᵢ_eff[i] / sᵢ[i]))
-        end
-    end
-end
-
-
-"""
-    set_initial_conditions!(epi_params::Epidemic_Params,
-                               population::Population_Params,
-                               Sᵛ₀::Array{Float64, 2},
-                               E₀::Array{Float64, 2},
-                               A₀::Array{Float64, 2},
-                               I₀::Array{Float64, 2},
-                               H₀::Array{Float64, 2},
-                               R₀::Array{Float64, 2})
+set_initial_conditions!(epi_params::Epidemic_Params,
+     population::Population_Params,
+     Sᵛ₀::Array{Float64, 2},
+     E₀::Array{Float64, 2},
+     A₀::Array{Float64, 2},
+     I₀::Array{Float64, 2},
+     H₀::Array{Float64, 2},
+     R₀::Array{Float64, 2})
 
 Set the initial number of individuals on a population. They can be
 introduced as susceptible vaccinated (Sᵛ₀), exposed unvaccinated (E₀), asymptomatic 
@@ -633,21 +700,21 @@ unvaccinated (R₀) individuals.
 
 # Arguments
 - `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
+and the epidemic spreading information.
 - `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
+related with the population.
 - `Sᵛ₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of vaccinated susceptible individuals of each strata on each patch.
+of vaccinated susceptible individuals of each strata on each patch.
 - `E₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of unvaccinated exposed individuals of each strata on each patch.
+of unvaccinated exposed individuals of each strata on each patch.
 - `A₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of unvaccinated asymptomatic infected individuals of each strata on each patch.
+of unvaccinated asymptomatic infected individuals of each strata on each patch.
 - `I₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of unvaccinated symptomatic infected individuals of each strata on each patch.
+of unvaccinated symptomatic infected individuals of each strata on each patch.
 - `H₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of unvaccinated pre-hospitalized individuals of each strata on each patch.
+of unvaccinated pre-hospitalized individuals of each strata on each patch.
 - `R₀::Array{Float64, 2}`: Matrix of size ``G \\times M`` containing the number
-  of unvaccinated recovered individuals of each strata on each patch.
+of unvaccinated recovered individuals of each strata on each patch.
 """
 function set_initial_conditions!(epi_params::Epidemic_Params,
                                population::Population_Params,
@@ -700,237 +767,6 @@ function set_initial_conditions!(epi_params::Epidemic_Params,
 end
 
 
-"""
-    reset_params!(epi_params::Epidemic_Params,
-                  population::Population_Params)
-
-Reset the epidemic and population parameters to reuse the structure and avoid
-additional data allocations.
-
-# Arguments
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
-"""
-function reset_params!(epi_params::Epidemic_Params,
-                       population::Population_Params)
-
-    reset_epidemic_params!(epi_params)
-    population.pᵍ_eff .= population.pᵍ
-    population.kᵍ_eff .= population.kᵍ
-    update_population_params!(population)
-
-end
-
-
-### ----------------------------------------------------------------------------
-### COMPUTE R FUNCTIONS
-### ----------------------------------------------------------------------------
-
-"""
-    compute_R_eff(epi_params::Epidemic_Params,
-                  population::Population_Params;
-                  τ::Int64 = 21)
-
-Compute the effective reproduction number R.
-
-# Arguments
-
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
-
-# Optional
-
-- `τ::Int64 = 21`: kernel length.
-
-# Return
-
-Tuple formed by:
-- DataFrame containing information about the evolution of the effective
-  reproduction number R for each strata and patch.
-- DataFrame containing information about the evolution of the total effective
-  reproduction number R.
-"""
-function compute_R_eff(epi_params::Epidemic_Params,
-                       population::Population_Params,
-                       τ::Int64 = 21)
-
-    M = population.M
-    G = population.G
-    T = epi_params.T - 1 # because we have to cut out the case t=1
-    V = epi_params.V
-    
-    βᴬ = epi_params.βᴬ[1]
-    βᴵ = epi_params.βᴵ[1]
-
-    ηᵍ = epi_params.ηᵍ
-    αᵍ = epi_params.αᵍ
-    μᵍ = epi_params.μᵍ
-    
-    rᵥ = epi_params.rᵥ
-    kᵥ = epi_params.kᵥ
-    
-    ρˢᵍᵥ = epi_params.ρˢᵍᵥ
-
-    # Setup the kernel
-    tʷ = 0:(τ - 1)
-    wᵍᵥ = ones(Float64, G, τ, V)
-
-    # Initialize results
-    Rᵢᵍ_eff = DataFrame()
-    Rᵢᵍ_eff.strata = repeat(1:G, outer = (T - τ) * M * V)
-    Rᵢᵍ_eff.vaccine = repeat(1:V, inner = G, outer = (T - τ) * M)
-    Rᵢᵍ_eff.patch = repeat(1:M, inner = G * V, outer = (T - τ))
-    Rᵢᵍ_eff.time = repeat(1:(T - τ), inner = G * M * V)
-
-    R_eff = DataFrame()
-    R_eff.time = 1:(T - τ)
-    Δρ = ones(G, M, T - τ, V)
-
-    # Compute R
-    Rᵢᵍᵥ = zeros(Float64, G, M, (T - τ), V)
-    Rᵢᵍ = ones(Float64, G, M, (T - τ) )
-    Rᵍ = ones(Float64, G, (T - τ) )
-    Rᵍᵥ= ones(Float64, G, (T - τ), V )
-    Rᵥ = ones(Float64, (T - τ), V )
-    R = zeros(T - τ)
-    for t in 1:(T - τ)
-        for v in 1:V
-            # This calculation would hold only without reinfection and waning immunity
-#             @simd for s in tʷ
-#                 @. Rᵢᵍᵥ[:, :, t, v] += epi_params.Qᵢᵍ[:, :, t + s + 2] * wᵍᵥ[:, s + 1, v] 
-#                 # the +2 instead of +1 is because time t corresponds to the time t+1 in the epi_params
-#             end
-            @simd for g in 1:G
-                @. Rᵢᵍᵥ[g, :, t, v] = epi_params.Qᵢᵍ[g, :, t] * (1 - kᵥ[v]) * (βᴬ/αᵍ[g] + βᴵ/μᵍ[g] )
-            end
-        end
-
-        # Notice that Δρ of time t corresponds to the time t+1 in the epi_params
-        # @. Δρ[:, :, t, :] = ρˢᵍᵥ[:, :, t, :] - ρˢᵍᵥ[:, :, t + 1, :]
-        # R[t] = sum(Rᵢᵍᵥ[:, :, t, :] .* Δρ[:, :, t, :] .* population.nᵢᵍ[:, :]) / sum( Δρ[:, :, t, :] .* population.nᵢᵍ[:, :] )
-        
-        Rᵍᵥ[:, t, :] = sum( Rᵢᵍᵥ[:, :, t, :] , dims = 2 )[:, 1, :] / M
-        Rᵥ[t, :] = sum( Rᵍᵥ[:, t, :] , dims = 1 )[1, :] / G 
-        Rᵢᵍ[:, :, t] = sum( Rᵢᵍᵥ[:, :, t, :] , dims = 4 )[:,:,1] / V
-        Rᵍ[:, t] = sum( Rᵢᵍ[:, :, t] , dims = 2 )[:,1] / M 
-        R[t] = sum(Rᵢᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :]) / population.N
-        
-    end
-
-    Rᵢᵍ_eff.R_eff = reshape(Rᵢᵍᵥ, G * M * (T - τ) * V)
-    R_eff.R_eff = R
-
-    return Rᵢᵍ_eff, Rᵍ, R_eff, Rᵥ, Rᵍᵥ
-end
-
-
-### ----------------------------------------------------------------------------
-### OUTPUT FUNCTIONS
-### ----------------------------------------------------------------------------
-
-"""
-    store_compartment(epi_params::Epidemic_Params,
-                      population::Population_Params,
-                      compartment::Char,
-                      suffix::String,
-                      folder::String)
-
-Store the evolution of the given epidemic compartment for each strata and patch.
-
-# Arguments
-
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
-- `compartment::String`: String indicating the compartment, one of: `"S"`,
-  `"E"`, `"A"`, `"I"`, `"PH"`, `"PD"`, `"HR"`, `"HD"`, `"D"`, `"R"`.
-- `suffix::String`: String used to identify the experiment.
-- `folder::String`: String containing the path to the folder where the results
-  will be stored.
-"""
-function store_compartment(epi_params::Epidemic_Params,
-                           population::Population_Params,
-                           compartment::String,
-                           suffix::String,
-                           folder::String)
-
-    M = population.M
-    G = population.G
-    T = epi_params.T
-    V = epi_params.V
-
-    # Init. dataframe
-    df = DataFrame()
-    df.strata = repeat(1:G, outer = T * M)
-    df.patch = repeat(1:M, inner = G, outer = T)
-    df.time = repeat(1:T, inner = G * M)
-
-    # Store number of cases
-    if compartment == "S"
-        df.cases = reshape(epi_params.ρˢᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "E"
-        df.cases = reshape(epi_params.ρᴱᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "A"
-        df.cases = reshape(epi_params.ρᴬᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "I"
-        df.cases = reshape(epi_params.ρᴵᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "PH"
-        df.cases = reshape(epi_params.ρᴾᴴᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "PD"
-        df.cases = reshape(epi_params.ρᴾᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "HR"
-        df.cases = reshape(epi_params.ρᴴᴿᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "HD"
-        df.cases = reshape(epi_params.ρᴴᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "D"
-        df.cases = reshape(epi_params.ρᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    elseif compartment == "R"
-        df.cases = reshape(epi_params.ρᴿᵍᵥ .* population.nᵢᵍ, G * M * T * V)
-    end
-
-    CSV.write(@sprintf("%s/output_%s_%s.csv", folder, compartment, suffix), df)
-end
-
-
-"""
-    store_R_eff(epi_params::Epidemic_Params,
-                population::Population_Params,
-                suffix::String,
-                folder::String;
-                τ::Int64 = 21)
-
-Compute and store the effective reproduction number R.
-
-# Arguments
-
-- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
-  and the epidemic spreading information.
-- `population::Population_Params`: Structure that contains all the parameters
-  related with the population.
-- `suffix::String`: String used to identify the experiment.
-- `folder::String`: String containing the path where the results will be stored.
-
-# Optional
-
-- `τ::Int64 = 21`: kernel length.
-"""
-function store_R_eff(epi_params::Epidemic_Params,
-                     population::Population_Params,
-                     suffix::String,
-                     folder::String;
-                     τ::Int64 = 21)
-
-    Rᵢᵍ_eff, R_eff = compute_R_eff(epi_params, population, τ)
-
-    # Write the results
-    CSV.write(@sprintf("%s/output_Reff_%s.csv", folder, suffix), Rᵢᵍ_eff)
-    CSV.write(@sprintf("%s/output_Reff_total_%s.csv", folder, suffix), R_eff)
-end
 
 
 ### ----------------------------------------------------------------------------
@@ -1010,7 +846,6 @@ Turns a origin destination matrix into an edgelist
 
 Returns an edgelist and a list of flows in those edges.
 """
-
 
 function make_edls(Rᵢⱼ) 
     Rᵢⱼ = replace(Rᵢⱼ, NaN => 0)
