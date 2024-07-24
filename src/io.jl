@@ -65,7 +65,6 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-
 function update_config!(config, cmd_line_args)
     # Define dictionary containing epidemic parameters
     if !haskey(config, "epidemic_params")
@@ -106,7 +105,6 @@ function update_config!(config, cmd_line_args)
 
     nothing
 end
-
 
 function init_pop_param_struct(G::Int64, M::Int64,
                                G_coords::Array{String, 1},
@@ -232,8 +230,6 @@ function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename::Stri
     return NPI_Params(κ₀s, ϕs, δs, tᶜs)
     
 end
-
-
 
 """
 save_simulation_hdf5(epi_params::Epidemic_Params,
