@@ -153,7 +153,7 @@ function optimal_vaccination_distribution(ϵᵍ::Array{Float64, 1},
     (G, M) = size(nᵢᵍ)
 
     if Nᵥ == 0
-        @debugg "No vaccination"
+        @debug "No vaccination"
         return zeros(G, M)
     end
     
