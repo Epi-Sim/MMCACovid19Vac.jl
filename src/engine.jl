@@ -1,85 +1,9 @@
-function parse_commandline()
-    s = ArgParseSettings()
-    engines = ["MMCACovid19Vac"]
-
-    @add_arg_table! s begin
-        "--config", "-c"
-            help = "config file (json file)"
-            required = true
-        "--engine", "-e"
-            help = "Simulator Engine"
-            range_tester = (x->x ∈ engines)
-            default = "MMCACovid19Vac" 
-        "--data-folder", "-d"
-            help = "data folder"
-            required = true
-        "--instance-folder", "-i"
-            help = "instance folder (experiment folder)"
-            default = "." 
-        "--export-compartments-full"
-            help = "export compartments of simulations"
-            action = :store_true
-        "--export-compartments-time-t"
-            help = "export compartments of simulations at a given time"
-            default = nothing
-            arg_type = Int
-        "--initial-conditions"
-            help = "compartments to initialize simulation. If missing, use the seeds to initialize the simulations"
-            default = nothing
-        "--start-date"
-            help = "starting date of simulation. Overwrites the one provided in config.json"
-            default = nothing
-        "--end-date"
-            help = "end date of simulation. Overwrites the one provided in config.json"
-            default = nothing
-    end
-    return parse_args(s)
-end
-
-
-function update_config!(config, cmd_line_args)
-    # Define dictionary containing epidemic parameters
-
-    # overwrite config with command line
-    if cmd_line_args["start-date"] !== nothing
-        config["simulation"]["first_day_simulation"] = cmd_line_args["start-date"]
-    end
-    if cmd_line_args["end-date"] !== nothing
-        config["simulation"]["last_day_simulation"] = cmd_line_args["end-date"]
-    end
-    if cmd_line_args["export-compartments-time-t"] !== nothing
-        config["simulation"]["export_compartments_time_t"] = cmd_line_args["export-compartments-time-t"]
-    end
-    if cmd_line_args["export-compartments-full"] == true
-        config["simulation"]["export_compartments_full"] = true
-    end
-    if cmd_line_args["initial-conditions"] !== nothing
-        config["data"]["initial-conditions"] = cmd_line_args["initial-conditions"]
-    end
-
-    nothing
-end
-
-
-
-function run_MMCACovid19Vac(args)
+function run_MMCACovid19Vac(config::Dict, data_path::String, instance_path::String, init_condition_path::String)
 
     ###########################################
     ############# FILE READING ################
     ###########################################
-
-    config_fname         = args["config"]
-    data_path            = args["data-folder"]
-    instance_path        = args["instance-folder"]
-    init_conditions_path = args["initial-conditions"]
-
-    @assert isfile(config_fname);
-    @assert isdir(data_path);
-    @assert isdir(instance_path);
-
-    config = JSON.parsefile(config_fname);
-    update_config!(config, args)
-
+    
     simulation_dict = config["simulation"]
     data_dict       = config["data"]
     epi_params_dict = config["epidemic_params"]
@@ -105,21 +29,22 @@ function run_MMCACovid19Vac(args)
     # Initial Condition
     #####################
 
-    if isnothing(init_conditions_path)
-        init_conditions_path = joinpath(data_path, get(data_dict, "initial_condition_filename", nothing))
+    if !isfile(init_condition_path) || length(init_condition_path) == 0
+        init_condition_path = joinpath(data_path, get(data_dict, "initial_condition_filename", nothing))
     end
 
 
     # use initial compartments matrix to initialize simulations
     if init_format == "netcdf"
-        @info "Reading initial conditions from: $(init_conditions_path)"
-        initial_compartments = ncread(init_conditions_path, "data")
+        @info "Reading initial conditions from: $(init_condition_path)"
+        initial_compartments = ncread(init_condition_path, "data")
     elseif init_format == "hdf5"
-        initial_compartments = h5open(init_conditions_path, "r") do file
+        initial_compartments = h5open(init_condition_path, "r") do file
             read(file, "data")
         end
     else
         @error "init_format must be one of : netcdf/hdf5"
+        return 1
     end
 
 
@@ -128,8 +53,8 @@ function run_MMCACovid19Vac(args)
     ########################################
 
     # Reading simulation start and end dates
-    first_day = Date(simulation_dict["first_day_simulation"])
-    last_day  = Date(simulation_dict["last_day_simulation"])
+    first_day = Date(simulation_dict["start_date"])
+    last_day  = Date(simulation_dict["end_date"])
     # Converting dates to time steps
     T = (last_day - first_day).value + 1
     # Array with time coordinates (dates)
