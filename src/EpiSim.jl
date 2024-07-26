@@ -10,6 +10,8 @@ using HDF5, DataFrames, NetCDF
 include("engine.jl")
 include("io.jl")
 
+ENGINES = ["MMCACovid19Vac"]
+
 function julia_main()::Cint
     try
         args = parse_commandline()
