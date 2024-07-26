@@ -1,14 +1,12 @@
 function parse_commandline()
     s = ArgParseSettings()
-    engines = ["MMCACovid19Vac"]
-
     @add_arg_table! s begin
         "--config", "-c"
             help = "config file (json file)"
             required = true
         "--engine", "-e"
             help = "Simulator Engine"
-            range_tester = (x->x ∈ engines)
+            range_tester = in(EpiSim.ENGINES)
             default = "MMCACovid19Vac" 
         "--data-folder", "-d"
             help = "data folder"
