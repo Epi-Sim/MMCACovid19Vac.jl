@@ -1,6 +1,6 @@
 module MMCACovid19Vac
 
-using Statistics, Dates, Printf, Logging
+using Statistics, Dates, Printf, Logging, LinearAlgebra
 using CSV, NPZ, JSON, HDF5, DataStructures, DelimitedFiles, DataFrames, NetCDF
 
 
@@ -30,6 +30,7 @@ export create_default_epi_params,
 	create_default_population_params,
 	create_default_vacparameters,
 	create_default_npiparameters,
+	create_config_template,
 	save_simulation_hdf5,
 	save_simulation_netCDF,
 	store_R_eff,
