@@ -24,6 +24,31 @@ function create_default_epi_params()
     return epiparams_dict
 end
 
+function create_epi_params_dict(G::Int)
+    epiparams_dict = Dict()
+    epiparams_dict["scale_β"] = 0.5
+    epiparams_dict["βᴬ"] = 0.05
+    epiparams_dict["βᴵ"] = 0.09
+    epiparams_dict["ηᵍ"] = ones(G) * 0.275
+    epiparams_dict["αᵍ"] = ones(G) * 0.65
+    epiparams_dict["μᵍ"] = ones(G) * 0.3
+    epiparams_dict["θᵍ"] = zeros(G)
+    epiparams_dict["γᵍ"] = ones(G) * 0.03
+    epiparams_dict["ζᵍ"] = ones(G) * 0.12
+    epiparams_dict["λᵍ"] = ones(G) * 0.275
+    epiparams_dict["ωᵍ"] = ones(G) * 0.1
+    epiparams_dict["ψᵍ"] = ones(G) * 0.14
+    epiparams_dict["χᵍ"] = ones(G) * 0.047
+    epiparams_dict["Λ"] = 0.02
+    epiparams_dict["Γ"] = 0.01
+    epiparams_dict["rᵥ"] = ones(G) * 0.6
+    epiparams_dict["kᵥ"] = ones(G) * 0.4
+    epiparams_dict["risk_reduction_dd"] = 0.0
+    epiparams_dict["risk_reduction_h"] = 0.1
+    epiparams_dict["risk_reduction_d"] = 0.05
+    return epiparams_dict
+end
+
 function create_default_population_params()
     population = Dict()
     populaiont["age_labels"] = ["Y", "M", "O"]
@@ -41,6 +66,20 @@ function create_default_population_params()
     return population
 end
 
+function create_population_params_dict(G::Int)
+    population = Dict()
+    populaiont["age_labels"] = ["G$(i)" for i in range(1,3)]
+    populaiont["C"] = C = Matrix{Float64}(I, G, G)
+    population["kᵍ"] = ones(G) * 12
+    population["kᵍ_h"] = ones(G) * 3.15
+    population["kᵍ_w"] = ones(G) * 2
+    population["pᵍ"] = ones(G) 
+    population["ξ"] = 0.01
+    population["σ"] = 2.5
+    
+    return population
+end
+
 function create_default_vacparameters()
     vacparams_dict = Dict()
     vacparams_dict["ϵᵍ"] = [0.1 , 0.4 , 0.5]
@@ -48,7 +87,16 @@ function create_default_vacparameters()
     vacparams_dict["start_vacc"] = 2
     vacparams_dict["dur_vacc"] = 8
     vacparams_dict["are_there_vaccines"] = false
+    return vacparams_dict
+end
 
+function create_vacparameters_dict(G::Int)
+    vacparams_dict = Dict()
+    vacparams_dict["ϵᵍ"] = ones(G) * 0.3
+    vacparams_dict["percentage_of_vacc_per_day"] = 0.005
+    vacparams_dict["start_vacc"] = 1
+    vacparams_dict["dur_vacc"] = 5
+    vacparams_dict["are_there_vaccines"] = false
     return vacparams_dict
 end
 
