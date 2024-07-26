@@ -51,8 +51,8 @@ end
 
 function create_default_population_params()
     population = Dict()
-    populaiont["age_labels"] = ["Y", "M", "O"]
-    populaiont["C"] = [ 0.598  0.38486 0.01714 ;
+    population["age_labels"] = ["Y", "M", "O"]
+    population["C"] = [ 0.598  0.38486 0.01714 ;
                         0.244  0.721   0.0353;
                         0.1919 0.5705  0.2376
                       ]
@@ -68,8 +68,8 @@ end
 
 function create_population_params_dict(G::Int)
     population = Dict()
-    populaiont["age_labels"] = ["G$(i)" for i in range(1,3)]
-    populaiont["C"] = C = Matrix{Float64}(I, G, G)
+    population["age_labels"] = ["G$(i)" for i in range(1,3)]
+    population["C"] = C = Matrix{Float64}(I, G, G)
     population["kᵍ"] = ones(G) * 12
     population["kᵍ_h"] = ones(G) * 3.15
     population["kᵍ_w"] = ones(G) * 2
