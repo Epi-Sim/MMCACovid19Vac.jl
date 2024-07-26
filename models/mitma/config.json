@@ -36,7 +36,7 @@
 		"risk_reduction_d": 0.05
 	},
 	"population_params": {
-		"agent_labels": ["Y", "M", "O"],
+		"G_labels": ["Y", "M", "O"],
 		"C": [
 				[ 0.598,  0.38486, 0.01714],
 				[ 0.244,  0.721,   0.0353],

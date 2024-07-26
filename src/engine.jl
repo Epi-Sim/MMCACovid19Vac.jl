@@ -73,7 +73,7 @@ function run_MMCACovid19Vac(config::Dict, data_path::String, instance_path::Stri
     M = length(M_coords)
 
     # Coordinates for each age strata (labels)
-    G_coords = map(String, pop_params_dict["agent_labels"])
+    G_coords = map(String, pop_params_dict["G_labels"])
     G = length(G_coords)
 
     ####################################################
