@@ -1,6 +1,6 @@
 name = "MMCACovid19Vac"
 uuid = "1f0b8349-d663-41e2-860e-e4a82e7cc3f6"
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
