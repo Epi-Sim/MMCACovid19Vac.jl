@@ -113,7 +113,7 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-function create_default_config(G::Int)
+function create_config_template(G::Int)
     # Define dictionary containing epidemic parameters
     config = Dict()
     config["epidemic_params"] = create_epi_params_dict(G)
