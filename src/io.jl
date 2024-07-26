@@ -24,6 +24,31 @@ function create_default_epi_params()
     return epiparams_dict
 end
 
+function create_epi_params_dict(G::Int)
+    epiparams_dict = Dict()
+    epiparams_dict["scale_β"] = 0.5
+    epiparams_dict["βᴬ"] = 0.05
+    epiparams_dict["βᴵ"] = 0.09
+    epiparams_dict["ηᵍ"] = ones(G) * 0.275
+    epiparams_dict["αᵍ"] = ones(G) * 0.65
+    epiparams_dict["μᵍ"] = ones(G) * 0.3
+    epiparams_dict["θᵍ"] = zeros(G)
+    epiparams_dict["γᵍ"] = ones(G) * 0.03
+    epiparams_dict["ζᵍ"] = ones(G) * 0.12
+    epiparams_dict["λᵍ"] = ones(G) * 0.275
+    epiparams_dict["ωᵍ"] = ones(G) * 0.1
+    epiparams_dict["ψᵍ"] = ones(G) * 0.14
+    epiparams_dict["χᵍ"] = ones(G) * 0.047
+    epiparams_dict["Λ"] = 0.02
+    epiparams_dict["Γ"] = 0.01
+    epiparams_dict["rᵥ"] = ones(G) * 0.6
+    epiparams_dict["kᵥ"] = ones(G) * 0.4
+    epiparams_dict["risk_reduction_dd"] = 0.0
+    epiparams_dict["risk_reduction_h"] = 0.1
+    epiparams_dict["risk_reduction_d"] = 0.05
+    return epiparams_dict
+end
+
 function create_default_population_params()
     population = Dict()
     populaiont["age_labels"] = ["Y", "M", "O"]
@@ -41,6 +66,20 @@ function create_default_population_params()
     return population
 end
 
+function create_population_params_dict(G::Int)
+    population = Dict()
+    populaiont["age_labels"] = ["G$(i)" for i in range(1,3)]
+    populaiont["C"] = C = Matrix{Float64}(I, G, G)
+    population["kᵍ"] = ones(G) * 12
+    population["kᵍ_h"] = ones(G) * 3.15
+    population["kᵍ_w"] = ones(G) * 2
+    population["pᵍ"] = ones(G) 
+    population["ξ"] = 0.01
+    population["σ"] = 2.5
+    
+    return population
+end
+
 function create_default_vacparameters()
     vacparams_dict = Dict()
     vacparams_dict["ϵᵍ"] = [0.1 , 0.4 , 0.5]
@@ -48,7 +87,16 @@ function create_default_vacparameters()
     vacparams_dict["start_vacc"] = 2
     vacparams_dict["dur_vacc"] = 8
     vacparams_dict["are_there_vaccines"] = false
+    return vacparams_dict
+end
 
+function create_vacparameters_dict(G::Int)
+    vacparams_dict = Dict()
+    vacparams_dict["ϵᵍ"] = ones(G) * 0.3
+    vacparams_dict["percentage_of_vacc_per_day"] = 0.005
+    vacparams_dict["start_vacc"] = 1
+    vacparams_dict["dur_vacc"] = 5
+    vacparams_dict["are_there_vaccines"] = false
     return vacparams_dict
 end
 
@@ -65,45 +113,14 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-function update_config!(config, cmd_line_args)
+function create_config_template(G::Int)
     # Define dictionary containing epidemic parameters
-    if !haskey(config, "epidemic_params")
-        config["epidemic_params"] = create_default_epi_params()
-    end
-
-    if !haskey(config, "population_params")
-        config["population_params"] = create_default_population_params()
-    end
-
-    # Define dictionary containing vaccination parameters
-    if !haskey(config, "vaccination")
-        config["vaccination"] = create_default_vacparameters()
-    end
-
-    # Define dictionary containing npi parameters
-    if (!haskey(config, "NPI") | !config["NPI"]["are_there_npi"] )
-        config["NPI"] = create_default_npiparameters()
-    end
-
-    # overwrite config with command line
-    if cmd_line_args["start-date"] !== nothing
-        config["simulation"]["first_day_simulation"] = cmd_line_args["start-date"]
-    end
-    if cmd_line_args["end-date"] !== nothing
-        config["simulation"]["last_day_simulation"] = cmd_line_args["end-date"]
-    end
-    if cmd_line_args["export-compartments-time-t"] !== nothing
-        config["simulation"]["export_compartments_time_t"] = cmd_line_args["export-compartments-time-t"]
-    end
-    if cmd_line_args["export-compartments-full"] == true
-        config["simulation"]["export_compartments_full"] = true
-    end
-
-    if cmd_line_args["initial-conditions"] !== nothing
-        config["data"]["initial-conditions"] = cmd_line_args["initial-conditions"]
-    end
-
-    nothing
+    config = Dict()
+    config["epidemic_params"] = create_epi_params_dict(G)
+    config["population_params"] = create_population_params_dict(G)
+    config["vaccination"] = create_vacparameters_dict(G)
+    config["NPI"] = create_default_npiparameters()
+    return config
 end
 
 """
@@ -413,7 +430,5 @@ function print_status(epi_params::Epidemic_Params,
                     epi_params.ρᴰᵍᵥ[:, :, t, 3] .+
                     epi_params.CHᵢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :]) / population.N
 
-    @printf("Time: %d, players: %.2f, sus3: %.2f, cases3: %.2f, deaths: %.2f, vaccine1 = %.2f, vaccine2: %.2f, vaccine3: %.2f\n",
-            t, players, sus3, cases3, deaths, vaccine1, vaccine2, vaccine3 )
-    
+    @info "Time: $(t), players: $(players), sus3: $(sus3), cases3: $(cases3), deaths: $(deaths), vaccine1: $(vaccine1), vaccine2: $(vaccine2), vaccine3: $(vaccine3)"    
 end

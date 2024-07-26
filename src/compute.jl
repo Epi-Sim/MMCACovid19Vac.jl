@@ -153,23 +153,23 @@ function optimal_vaccination_distribution(ϵᵍ::Array{Float64, 1},
     (G, M) = size(nᵢᵍ)
 
     if Nᵥ == 0
-        @info "No vaccination"
+        @debug "No vaccination"
         return zeros(G, M)
     end
     
     
+    if any(ϵᵍ .< 0)
+        @error "COMPUTING ERROR: Number of dosis is negative"
+        return
+    end
+
     only_positive = true
     for v in 1:V
         only_positive = only_positive & all(ρˢᵍᵥ[:, :, t, v] .>= 0.0) & all(ρˢᵍᵥ[:, :, t, v] .<= 1.0)
     end
-        
-    if any(ϵᵍ .< 0)
-        @printf("\n ----------------------------- \n ATTENZIONE: Number of dosis is negative \n ----------------------------- ")
-        return
-    end
     
     if !only_positive
-        @printf("ATTENZIONE: Fraction of susceptible is not between 0 and 1")
+        @error "COMPUTING ERROR: Fraction of susceptible is not between 0 and 1"
         return
     end
     
