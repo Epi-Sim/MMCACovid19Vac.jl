@@ -113,13 +113,14 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-function create_default_config!()
+function create_default_config(G::Int)
     # Define dictionary containing epidemic parameters
-    # config = Dict
-    # config["epidemic_params"] = create_default_epi_params()
-    # config["population_params"] = create_default_population_params()
-    # config["vaccination"] = create_default_vacparameters()
-    # config["NPI"] = create_default_npiparameters()
+    config = Dict()
+    config["epidemic_params"] = create_epi_params_dict(G)
+    config["population_params"] = create_population_params_dict(G)
+    config["vaccination"] = create_vacparameters_dict(G)
+    config["NPI"] = create_default_npiparameters()
+    return config
 end
 
 """
