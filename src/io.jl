@@ -68,7 +68,7 @@ end
 
 function create_population_params_dict(G::Int)
     population = Dict()
-    population["age_labels"] = ["G$(i)" for i in range(1,3)]
+    population["age_labels"] = ["G$(i)" for i in range(1,G)]
     population["C"] = C = Matrix{Float64}(I, G, G)
     population["kᵍ"] = ones(G) * 12
     population["kᵍ_h"] = ones(G) * 3.15
