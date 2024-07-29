@@ -2,46 +2,45 @@ module EpiSim
 
 using MMCACovid19Vac
 using ArgParse
-import JSON
-import CSV
-using Dates, Logging
+using Dates, Logging, Printf
 using HDF5, DataFrames, NetCDF
 
+import JSON
+import CSV
+
+
+include("commands.jl")
 include("engine.jl")
 include("io.jl")
 
-ENGINES = ["MMCACovid19Vac"]
+const ENGINES  = ["MMCACovid19Vac"]
+const COMMANDS = ["run", "setup", "init"]
 
 function julia_main()::Cint
     try
-        args = parse_commandline()
-        
-        engine        = args["engine"]
-        data_path     = args["data-folder"]
-        config_fname  = args["config"]
-        instance_path = args["instance-folder"]
-        init_condition_path = args["initial-condition"]
-        
-        config = JSON.parsefile(config_fname);
-        update_config!(config, args)
-
-        @assert isfile(config_fname);
-        @assert isdir(data_path);
-        @assert isdir(instance_path);
-        
-        validate_config(config, engine)
-
-        if engine == "MMCACovid19Vac"
-            run_MMCACovid19Vac(config, data_path, instance_path, init_condition_path)
-        else
-            println("Error unknown engine $(engine)")
+        args = parse_command_line()
+        command = args["%COMMAND%"]
+        engine = args["engine"]
+    
+        # Check if the provided command is in the list of accepted commands
+        if !(command in COMMANDS)
+            println("Unknown command: $command")
+            println("Accepted commands are: $(join(COMMANDS, ", "))")
             return 1
         end
+
+        if command == "run"
+            execute_run(args["run"], engine)
+        elseif command == "setup"
+            execute_setup(args["setup"], engine)
+        elseif command == "init"
+            execute_init(args)
+        end
+
     catch
         Base.invokelatest(Base.display_error, Base.catch_stack())
         return 1
     end
-
     return 0
 end
 
