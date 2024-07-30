@@ -3,7 +3,7 @@ function parse_command_line()
 
     @add_arg_table s begin
         "run"
-            help = ""
+            help = "Run an epidemic simulation using the given engine"
             action = :command
         "setup"
             help = "Setup a model (config, and the required (empty) datafiles) for the give engine"
@@ -13,7 +13,6 @@ function parse_command_line()
             action = :command
         "--engine", "-e"
             help = "Simulator Engine"
-            # range_tester = in(EpiSim.ENGINES)
             default = "MMCACovid19Vac"
     end
 
