@@ -28,3 +28,5 @@ output/*.nc
 output/*.csv
 output/*.hdf5
 
+episim
+bin/episim
