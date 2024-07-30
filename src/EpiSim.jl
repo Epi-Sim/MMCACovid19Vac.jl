@@ -13,7 +13,7 @@ include("commands.jl")
 include("engine.jl")
 include("io.jl")
 
-const ENGINES  = ["MMCACovid19Vac"]
+const ENGINES  = ["MMCACovid19Vac", "MMCACovid19"]
 const COMMANDS = ["run", "setup", "init"]
 
 function julia_main()::Cint
@@ -26,6 +26,12 @@ function julia_main()::Cint
         if !(command in COMMANDS)
             println("Unknown command: $command")
             println("Accepted commands are: $(join(COMMANDS, ", "))")
+            return 1
+        end
+
+        if !(engine in ENGINES)
+            println("Unknown engine: $engine")
+            println("Accepted engine are: $(join(ENGINES, ", "))")
             return 1
         end
 
