@@ -57,7 +57,7 @@ function main(args)
 
     output_format    = simulation_dict["output_format"]
     save_full_output = get(simulation_dict, "save_full_output", false)
-    save_time_step   = get(simulation_dict, "save_time_step", nothing)
+    export_compartments_time_t = get(simulation_dict, "export_compartments_time_t", nothing)
     init_format      = get(simulation_dict, "init_format", "netcdf")
 
     #####################
@@ -158,8 +158,8 @@ function main(args)
     @info "\t- V (vaccination states) = " epi_params.V
     @info "\t- N. of epi compartments = " epi_params.NumComps
     @info "\t- Save full output = " save_full_output
-    if save_time_step !== nothing
-        @info "\t- Save time step at t=" save_time_step
+    if export_compartments_time_t !== nothing
+        @info "\t- Export compartments at t=" export_compartments_time_t
     end
 
     ########################################################
@@ -187,7 +187,7 @@ function main(args)
         end
     end
 
-    if save_time_step !== nothing
+    if export_compartments_time_t !== nothing
         export_compartments_date = first_day + Day(export_compartments_time_t - 1)
         filename = joinpath(output_path, "compartments_t_$(export_compartments_date).h5")
         @info "Storing compartments at single date $(export_compartments_date):"
