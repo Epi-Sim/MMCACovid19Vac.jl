@@ -20,6 +20,8 @@ import json
 import subprocess
 import logging
 import pandas as pd
+import uuid
+import shutil
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -38,17 +40,27 @@ class MMCACovid19:
         assert os.path.exists(data_folder)
         assert os.path.exists(instance_folder)
 
-        config_path = MMCACovid19.handle_config_input(instance_folder, config)
-
         self.executable_path = executable_path
+        self.instance_folder = instance_folder
+        self.uuid = str(uuid.uuid4())
+        self.model_state_folder = os.path.join(instance_folder, self.uuid)
+        os.makedirs(self.model_state_folder, exist_ok=False)
+
+        config_path = MMCACovid19.handle_config_input(self.model_state_folder, config)
+
         self.config_path = config_path
         self.data_folder = data_folder
-        self.instance_folder = instance_folder
+
         self.model_state = initial_conditions
+        if initial_conditions:
+            # Copy initial conditions to the unique folder
+            new_initial_conditions = os.path.join(self.model_state_folder, os.path.basename(initial_conditions))
+            shutil.copy(initial_conditions, new_initial_conditions)
+            self.model_state = new_initial_conditions
 
-        logger.info("Model wrapper init complete")
+        logger.info(f"Model wrapper init complete. UUID: {self.uuid}")
 
-    def step(self, start_date, length_days, config=None):
+    def step(self, start_date, length_days):
         """
         Run the model for a given number of days starting from a given start date.
         Updates the config and the model state, then calls the simulator.
@@ -56,8 +68,7 @@ class MMCACovid19:
         Returns the model state and the next start date.
         """
 
-        self.config_path = MMCACovid19.handle_config_input(self.instance_folder, config) if config else self.config_path
-        end_date = date_addition(start_date, length_days)
+        end_date = date_addition(start_date, length_days - 1)
 
         logger.debug(f"Running model from {start_date} to {end_date}")
         self.run_model(
@@ -72,6 +83,9 @@ class MMCACovid19:
         logger.debug(f"Step complete")
         return self.model_state, date_addition(end_date, 1)
 
+    def update_config(self, config):
+        self.config_path = self.handle_config_input(self.model_state_folder, config)
+
     def run_model(self, length_days, start_date, end_date, model_state=None):
         """
         Run the compiled model (eg. MMCACovid19Vac).
@@ -81,7 +95,7 @@ class MMCACovid19:
         cmd = [self.executable_path]
         cmd.extend(["--config", self.config_path])
         cmd.extend(["--data-folder", self.data_folder])
-        cmd.extend(["--instance-folder", self.instance_folder])
+        cmd.extend(["--instance-folder", self.model_state_folder])
 
         if model_state:
             cmd.extend(["--initial-conditions", model_state])
@@ -102,24 +116,26 @@ class MMCACovid19:
         return result.stdout
 
     def model_state_filename(self, end_date):
-        return os.path.join(self.instance_folder, "output", f"compartments_t_{end_date}.h5")
+        return os.path.join(self.model_state_folder, "output", f"compartments_t_{end_date}.h5")
 
     def update_model_state(self, end_date):
         self.model_state = self.model_state_filename(end_date)
         pass
 
-    def handle_config_input(instance_folder, config):
+    @staticmethod
+    def handle_config_input(model_state_folder, config):
         """
         Note that because we use a static file name you cannot run two instances of MMCACovid19 at the same time.
         TODO: enable that with unique config file names (?)
         """
         if isinstance(config, dict):
             # write our own config file for the model to use
-            config_path = os.path.join(instance_folder, 'config_auto_py.json')
+            config_path = os.path.join(model_state_folder, 'config_auto_py.json')
             with open(config_path, 'w') as f:
                 json.dump(config, f, indent=4)
         elif isinstance(config, str) and os.path.exists(config):
-            config_path = config
+            config_path = os.path.join(model_state_folder, os.path.basename(config))
+            shutil.copy(config, config_path)
         else:
             raise ValueError(f"Invalid config: {config}")
 
@@ -187,12 +203,18 @@ def agent_flow_example():
 
     start_date="2023-01-01"
     logger.info(f"First date: {start_date}")
-    new_state, next_date = model.step(start_date=start_date, length_days=5)
-    logger.debug(f"Model state: {new_state}")
-    logger.info(f"Next date: {next_date}")
-    new_state, next_date = model.step(start_date=next_date, length_days=5)
-    logger.info(f"Next date: {next_date}")
-    logger.debug(f"Model state: {new_state}")
+    current_date = start_date
+    for i in range(10):
+        new_state, next_date = model.step(start_date=current_date, length_days=10)
+
+        # update the policy
+        # increase the level of lockdown by 5%
+        config["NPI"]["κ₀s"] = [ config["NPI"]["κ₀s"][0] * (1 - 0.05) ]
+        model.update_config(config)
+
+        logger.debug(f"Iteration {i+1} - Model state: {new_state}")
+        logger.info(f"Iteration {i+1} - Next date: {next_date}")
+        current_date = next_date
 
     logger.info("Example done")
 
