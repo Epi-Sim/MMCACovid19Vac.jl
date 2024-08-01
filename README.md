@@ -22,9 +22,37 @@ MMCA_with_vaccination [https://github.com/PGcastioni/MMCA_with_vaccination/]([ur
 
 This project is an attempt to extend the functionalities of the previous version. Currently, this version provides a standard configuration format for defining a model and provides a simple set of command line scripts to generate configuration templates and run the model.
 
+
+### Installing
+
+To install EpiSim.jl, follow these steps:
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/your-repo/EpiSim.jl.git
+   cd EpiSim.jl
+   ```
+
+2. Run the installation script:
+   ```
+   ./install.sh [HPC_ACCOUNT_NAME]
+   ```
+   
+   Note: The `HPC_ACCOUNT_NAME` argument is required only when running on BSC HPC systems.
+
+   This is because the compile time is long enough that we need to schedule a slurm job for it.
+
+The compilation process (`install.jl`) creates a single precompiled executable:
+
+- Builds the application in a `build` folder
+- Creates a symlink named `episim` in the target directory (default is the current directory)
+
+After installation, you can run EpiSim using the `episim` command.
+
+
 ### Using EpiSim.jl
 
-EpiSim works as a command line frontend to lunch simulations. It provides a simple JSON based config format to define an instance of a model. The config format included a common or core sets of parameter and specific parameters required by the different engies supported by EpiSim.jl.
+EpiSim works as a command line frontend to launch simulations. It provides a simple JSON based config format to define an instance of a model. The config format included a common or core sets of parameter and specific parameters required by the different engines supported by EpiSim.jl.
 
 ### The `epiconfig.json` format
 ```

@@ -1,10 +1,8 @@
 using Pkg
 
+# run this in an interactive session in MN5 or it will time-out !!
+# note that you should have installed the dependencies before running this script
 Pkg.activate(".")
-
-Pkg.add(url="https://github.com/Epi-Sim/MMCACovid19Vac.jl")
-Pkg.instantiate()
-Pkg.precompile()
 
 using PackageCompiler
 using ArgParse
