@@ -24,7 +24,7 @@ import uuid
 import shutil
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
@@ -59,6 +59,7 @@ class MMCACovid19:
             self.model_state = new_initial_conditions
 
         logger.info(f"Model wrapper init complete. UUID: {self.uuid}")
+        return self.uuid
 
     def step(self, start_date, length_days):
         """
@@ -107,7 +108,7 @@ class MMCACovid19:
         cmd.extend(["--end-date", end_date])
 
         cmdstr = " ".join(cmd)
-        logger.info(f"Running command:\n{cmdstr}")
+        logger.debug(f"Running command:\n{cmdstr}")
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
@@ -208,7 +209,7 @@ def agent_flow_example():
         new_state, next_date = model.step(start_date=current_date, length_days=10)
 
         # update the policy
-        # increase the level of lockdown by 5%
+        # increase the level of lockdown by 5% at each iteration
         config["NPI"]["κ₀s"] = [ config["NPI"]["κ₀s"][0] * (1 - 0.05) ]
         model.update_config(config)
 
