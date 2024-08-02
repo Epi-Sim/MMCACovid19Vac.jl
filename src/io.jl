@@ -430,5 +430,7 @@ function print_status(epi_params::Epidemic_Params,
                     epi_params.ρᴰᵍᵥ[:, :, t, 3] .+
                     epi_params.CHᵢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :]) / population.N
 
-    @info "Time: $(t), players: $(players), sus3: $(sus3), cases3: $(cases3), deaths: $(deaths), vaccine1: $(vaccine1), vaccine2: $(vaccine2), vaccine3: $(vaccine3)"    
+    formatted_output = @sprintf("Time: %d, players: %.2f, sus3: %.2f, cases3: %.2f, deaths: %.2f, vaccine1 = %.2f, vaccine2: %.2f, vaccine3: %.2f\n",
+    t, players, sus3, cases3, deaths, vaccine1, vaccine2, vaccine3 )
+    @info "$(formatted_output) "    
 end
