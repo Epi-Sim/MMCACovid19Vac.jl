@@ -31,7 +31,37 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.handlers[0].setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
 class MMCACovid19:
+    """
+    A wrapper for EpiSim.jl that handles file writing and reading for executing the model.
+
+    This class manages the configuration files and model state, allowing for step-by-step
+    execution of the EpiSim model.
+
+    Attributes:
+        executable_path (str): Path to the compiled EpiSim executable.
+        instance_folder (str): Folder to store instance-specific data.
+        uuid (str): Unique identifier for this model instance.
+        model_state_folder (str): Folder to store model state files.
+        config_path (str): Path to the current configuration file.
+        data_folder (str): Folder containing input data for the model.
+        model_state (str): Path to the current model state file.
+
+    """
+
     def __init__(self, executable_path, config, data_folder, instance_folder, initial_conditions=None):
+        """
+        Initialize the MMCACovid19 model wrapper.
+
+        Args:
+            executable_path (str): Path to the compiled EpiSim executable.
+            config (dict or str): Model configuration as a dictionary or path to a JSON file.
+            data_folder (str): Folder containing input data for the model.
+            instance_folder (str): Folder to store instance-specific data.
+            initial_conditions (str, optional): Path to initial conditions file.
+
+        Raises:
+            AssertionError: If required paths do not exist or are invalid.
+        """
         # assert the compiled executable exists
         assert os.path.exists(executable_path)
         assert os.path.isfile(executable_path)
@@ -64,11 +94,18 @@ class MMCACovid19:
     def step(self, start_date, length_days):
         """
         Run the model for a given number of days starting from a given start date.
-        Updates the config and the model state, then calls the simulator.
 
-        Returns the model state and the next start date.
+        This method updates the config and model state, then calls the simulator.
+
+        Args:
+            start_date (str): Start date for the simulation step (format: 'YYYY-MM-DD').
+            length_days (int): Number of days to simulate.
+
+        Returns:
+            tuple: A tuple containing:
+                - str: Path to the updated model state file.
+                - str: The next start date after this step.
         """
-
         end_date = date_addition(start_date, length_days - 1)
 
         logger.debug(f"Running model from {start_date} to {end_date}")
@@ -89,10 +126,20 @@ class MMCACovid19:
 
     def run_model(self, length_days, start_date, end_date, model_state=None):
         """
-        Run the compiled model (eg. MMCACovid19Vac).
-        Provide your config as a dict or as a path to a json file.
-        """
+        Run the compiled model for a specific time period.
 
+        Args:
+            length_days (int): Number of days to simulate.
+            start_date (str): Start date for the simulation (format: 'YYYY-MM-DD').
+            end_date (str): End date for the simulation (format: 'YYYY-MM-DD').
+            model_state (str, optional): Path to the initial model state file.
+
+        Returns:
+            str: Output from the model execution.
+
+        Raises:
+            RuntimeError: If the model execution fails.
+        """
         cmd = [self.executable_path]
         cmd.extend(["--config", self.config_path])
         cmd.extend(["--data-folder", self.data_folder])
@@ -121,13 +168,21 @@ class MMCACovid19:
 
     def update_model_state(self, end_date):
         self.model_state = self.model_state_filename(end_date)
-        pass
 
     @staticmethod
     def handle_config_input(model_state_folder, config):
         """
-        Note that because we use a static file name you cannot run two instances of MMCACovid19 at the same time.
-        TODO: enable that with unique config file names (?)
+        Process the configuration input and save it to a file.
+
+        Args:
+            model_state_folder (str): Folder to save the configuration file.
+            config (dict or str): Configuration as a dictionary or path to a JSON file.
+
+        Returns:
+            str: Path to the processed configuration file.
+
+        Raises:
+            ValueError: If the config input is invalid.
         """
         if isinstance(config, dict):
             # write our own config file for the model to use
