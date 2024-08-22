@@ -597,11 +597,26 @@ function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
 end
 
 function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, kappa0_filename::String, first_day::Date)
+    κ₀_df = nothing
     if !isnothing(kappa0_filename)
         kappa0_filename = joinpath(data_path, kappa0_filename)
         @info "- Loading κ₀ time series from $(kappa0_filename)"
         κ₀_df = CSV.read(kappa0_filename, DataFrame);
-        # syncronize containment measures with simulation
+    end
+
+    return init_NPI_parameters_struct(κ₀_df, npi_params_dict, first_day)
+end
+
+function init_NPI_parameters_struct(κ₀_df::Union{DataFrame, Nothing}, npi_params_dict::Dict, first_day::Date)
+    if isnothing(κ₀_df)
+        # Handle the case when κ₀_df is nothing
+        # For example, you could use default values or read from npi_params_dict
+        tᶜs = npi_params_dict["tᶜs"]
+        κ₀s = npi_params_dict["κ₀s"]
+        ϕs = npi_params_dict["ϕs"]
+        δs = npi_params_dict["δs"]
+    else
+        # Existing logic for when κ₀_df is a DataFrame
         @info "- Synchronizing to dates"
         κ₀_df.time = map(x -> (x .- first_day).value + 1, κ₀_df.date)
         # Timesteps when the containment measures will be applied
@@ -613,23 +628,13 @@ function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, ka
         ϕs_aux = Float64.(npi_params_dict["ϕs"])
         δs_aux = Float64.(npi_params_dict["δs"])
 
-        #Supposing ϕs and δs are constant, while the confinement measures are applied
+        # Supposing ϕs and δs are constant, while the confinement measures are applied
         ϕs = fill(ϕs_aux[1], length(tᶜs))
-        δs = fill(δs_aux[1], length(tᶜs))
-
-    else
-        # Timesteps when the containment measures will be applied
-        tᶜs = npi_params_dict["tᶜs"]
-        # Array of level of confinement
-        κ₀s = npi_params_dict["κ₀s"]
-        # Array of premeabilities of confined households
-        ϕs = npi_params_dict["ϕs"]
         # Array of social distancing measures
-        δs = npi_params_dict["δs"]
+        δs = fill(δs_aux[1], length(tᶜs))
     end
 
     return NPI_Params(κ₀s, ϕs, δs, tᶜs)
-    
 end
 
 
