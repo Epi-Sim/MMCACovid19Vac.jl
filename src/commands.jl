@@ -1,3 +1,5 @@
+include("engine.jl")
+
 function parse_command_line()
     s = ArgParseSettings()
 
@@ -106,9 +108,8 @@ function execute_run(args, engine)
     
     validate_config(config, engine)
 
-    if engine == "MMCACovid19Vac"
-        run_MMCACovid19Vac(config, data_path, instance_path, init_condition_path)
-    end
+    run_engine_io(engine, config, data_path, instance_path, init_condition_path)
+    @info "done executing run command"
 end
 
 function execute_setup(args, engine)
@@ -133,7 +134,7 @@ function execute_setup(args, engine)
     # df[!, "Total"] = sum(eachcol(df))
 end
 
-function execute_init(args)
+function execute_init()
     conditions₀ = CSV.read(seeds_fname, DataFrame)
     patches_idxs = Int.(conditions₀[:, "idx"])
     
@@ -231,7 +232,7 @@ function create_core_config()
     config["simulation"]["start-date"] = "01-01-2020"
     config["simulation"]["end-date"]   = "02-15-2020"
     config["simulation"]["save_full_output"] = true
-    config["simulation"]["save_time_step"] = nothing
+    config["simulation"]["export_compartments_time_t"] = nothing
     config["simulation"]["output_folder"] = "output"
     config["simulation"]["output_format"] = "netcdf"
     
@@ -243,10 +244,8 @@ function create_core_config()
     return config
 end
 
-function create_config_template(engine::String, M::Int, G::Int)
+function create_config_template(::MMCACovid19VacEngine, M::Int, G::Int)
     config = create_core_config()
-    if engine == "MMCACovid19Vac"
-        config = merge(config, MMCACovid19Vac.create_config_template(G))
-    end
+    config = merge(config, MMCACovid19Vac.create_config_template(G))
     return config
 end
