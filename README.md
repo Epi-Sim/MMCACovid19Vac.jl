@@ -54,6 +54,7 @@ After installation, you can run EpiSim using the `episim` command.
 
 EpiSim works as a command line frontend to launch simulations. It provides a simple JSON based config format to define an instance of a model. The config format included a common or core sets of parameter and specific parameters required by the different engines supported by EpiSim.jl. An example is given at `models/mitma/config.json`
 
+
 ### The `epiconfig.json` format
 ```
 {
