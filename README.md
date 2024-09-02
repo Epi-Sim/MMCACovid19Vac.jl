@@ -96,7 +96,7 @@ pip install -r py_interface/requirements.txt
 Run the model in steps:
 
 ```python
-from py_interface.EpiSim import MMCACovid19
+from epi_sim import EpiSim
 
 executable_path = "./episim"
 config_path = "models/mitma/config.json"
