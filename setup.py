@@ -7,12 +7,6 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'pandas',
-        'numpy',
-        'shutil',
-        'uuid',
-        'logging',
-        'subprocess',
-        'json',
     ],
     author='Lewis Knox',
     author_email='lknoxstr@bsc.es',
