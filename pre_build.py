@@ -16,5 +16,3 @@ class CustomBuildHook(BuildHookInterface):
 
     def clean(self, versions):
         print("CustomBuildHook clean method called")
-        with open("build_log.txt", "a") as f:
-            f.write("CustomBuildHook clean method called\n")
