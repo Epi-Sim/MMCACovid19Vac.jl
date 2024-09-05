@@ -45,12 +45,13 @@ function _save_full(epi_params, population, output_path::String, ::NetCDFFormat;
         @error "Error saving simulation output" exception=(e, catch_backtrace())
         rethrow(e)
     end
-    @info "done saving ??"
 end
 
 function _save_full(epi_params, population, output_path::String, ::HDF5Format; kwargs...)
     filename = joinpath(output_path, "compartments_full.h5")
     @info "Storing full simulation output in HDF5: $filename"
+    @warn "HDF5 format is deprecated"
+    throw(ArgumentError("HDF5 format is deprecated"))
     save_simulation_hdf5(epi_params, population, filename)
 end
 
