@@ -528,7 +528,7 @@ function init_pop_param_struct(G::Int64, M::Int64,
     # Degree of mobility per strata
     pᵍ = Float64.(pop_params_dict["pᵍ"])
     # Density factor
-    ξ = pop_params_dict["σ"]
+    ξ = pop_params_dict["ξ"]
     # Average household size
     σ = pop_params_dict["σ"]
 
@@ -596,7 +596,7 @@ function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
     return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
 end
 
-function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, kappa0_filename::String, first_day::Date)
+function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, kappa0_filename::Union{String, Nothing}, first_day::Date)
     κ₀_df = nothing
     if !isnothing(kappa0_filename)
         kappa0_filename = joinpath(data_path, kappa0_filename)
