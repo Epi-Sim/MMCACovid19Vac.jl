@@ -24,10 +24,35 @@ function create_default_epi_params()
     return epiparams_dict
 end
 
+function create_epi_params_dict(G::Int)
+    epiparams_dict = Dict()
+    epiparams_dict["scale_β"] = 0.5
+    epiparams_dict["βᴬ"] = 0.05
+    epiparams_dict["βᴵ"] = 0.09
+    epiparams_dict["ηᵍ"] = ones(G) * 0.275
+    epiparams_dict["αᵍ"] = ones(G) * 0.65
+    epiparams_dict["μᵍ"] = ones(G) * 0.3
+    epiparams_dict["θᵍ"] = zeros(G)
+    epiparams_dict["γᵍ"] = ones(G) * 0.03
+    epiparams_dict["ζᵍ"] = ones(G) * 0.12
+    epiparams_dict["λᵍ"] = ones(G) * 0.275
+    epiparams_dict["ωᵍ"] = ones(G) * 0.1
+    epiparams_dict["ψᵍ"] = ones(G) * 0.14
+    epiparams_dict["χᵍ"] = ones(G) * 0.047
+    epiparams_dict["Λ"] = 0.02
+    epiparams_dict["Γ"] = 0.01
+    epiparams_dict["rᵥ"] = ones(G) * 0.6
+    epiparams_dict["kᵥ"] = ones(G) * 0.4
+    epiparams_dict["risk_reduction_dd"] = 0.0
+    epiparams_dict["risk_reduction_h"] = 0.1
+    epiparams_dict["risk_reduction_d"] = 0.05
+    return epiparams_dict
+end
+
 function create_default_population_params()
     population = Dict()
-    populaiont["age_labels"] = ["Y", "M", "O"]
-    populaiont["C"] = [ 0.598  0.38486 0.01714 ;
+    population["age_labels"] = ["Y", "M", "O"]
+    population["C"] = [ 0.598  0.38486 0.01714 ;
                         0.244  0.721   0.0353;
                         0.1919 0.5705  0.2376
                       ]
@@ -41,6 +66,20 @@ function create_default_population_params()
     return population
 end
 
+function create_population_params_dict(G::Int)
+    population = Dict()
+    population["age_labels"] = ["G$(i)" for i in range(1,G)]
+    population["C"] = C = Matrix{Float64}(I, G, G)
+    population["kᵍ"] = ones(G) * 12
+    population["kᵍ_h"] = ones(G) * 3.15
+    population["kᵍ_w"] = ones(G) * 2
+    population["pᵍ"] = ones(G) 
+    population["ξ"] = 0.01
+    population["σ"] = 2.5
+    
+    return population
+end
+
 function create_default_vacparameters()
     vacparams_dict = Dict()
     vacparams_dict["ϵᵍ"] = [0.1 , 0.4 , 0.5]
@@ -48,7 +87,16 @@ function create_default_vacparameters()
     vacparams_dict["start_vacc"] = 2
     vacparams_dict["dur_vacc"] = 8
     vacparams_dict["are_there_vaccines"] = false
+    return vacparams_dict
+end
 
+function create_vacparameters_dict(G::Int)
+    vacparams_dict = Dict()
+    vacparams_dict["ϵᵍ"] = ones(G) * 0.3
+    vacparams_dict["percentage_of_vacc_per_day"] = 0.005
+    vacparams_dict["start_vacc"] = 1
+    vacparams_dict["dur_vacc"] = 5
+    vacparams_dict["are_there_vaccines"] = false
     return vacparams_dict
 end
 
@@ -65,175 +113,15 @@ function create_default_npiparameters()
     return npiparams_dict
 end
 
-
-function update_config!(config, cmd_line_args)
+function create_config_template(G::Int)
     # Define dictionary containing epidemic parameters
-    if !haskey(config, "epidemic_params")
-        config["epidemic_params"] = create_default_epi_params()
-    end
-
-    if !haskey(config, "population_params")
-        config["population_params"] = create_default_population_params()
-    end
-
-    # Define dictionary containing vaccination parameters
-    if !haskey(config, "vaccination")
-        config["vaccination"] = create_default_vacparameters()
-    end
-
-    # Define dictionary containing npi parameters
-    if (!haskey(config, "NPI") | !config["NPI"]["are_there_npi"] )
-        config["NPI"] = create_default_npiparameters()
-    end
-
-    # overwrite config with command line
-    if cmd_line_args["start-date"] !== nothing
-        config["simulation"]["first_day_simulation"] = cmd_line_args["start-date"]
-    end
-    if cmd_line_args["end-date"] !== nothing
-        config["simulation"]["last_day_simulation"] = cmd_line_args["end-date"]
-    end
-    if cmd_line_args["export-compartments-time-t"] !== nothing
-        config["simulation"]["export_compartments_time_t"] = cmd_line_args["export-compartments-time-t"]
-    end
-    if cmd_line_args["export-compartments-full"] == true
-        config["simulation"]["export_compartments_full"] = true
-    end
-
-    if cmd_line_args["initial-conditions"] !== nothing
-        config["data"]["initial-conditions"] = cmd_line_args["initial-conditions"]
-    end
-
-    nothing
+    config = Dict()
+    config["epidemic_params"] = create_epi_params_dict(G)
+    config["population_params"] = create_population_params_dict(G)
+    config["vaccination"] = create_vacparameters_dict(G)
+    config["NPI"] = create_default_npiparameters()
+    return config
 end
-
-
-function init_pop_param_struct(G::Int64, M::Int64,
-                               G_coords::Array{String, 1},
-                               pop_params_dict::Dict, 
-                               metapop_df::DataFrame,
-                               network_df::DataFrame)
-
-    # Subpopulations' patch surface
-    sᵢ = metapop_df[:, "area"]
-    # Subpopulation by age strata
-    nᵢᵍ = copy(transpose(Array{Float64,2}(metapop_df[:, G_coords])))
-    # Age Contact Matrix
-    C = Float64.(mapreduce(permutedims, vcat, pop_params_dict["C"]))
-    # Average number of contacts per strata
-    kᵍ = Float64.(pop_params_dict["kᵍ"])
-    # Average number of contacts at home per strata
-    kᵍ_h = Float64.(pop_params_dict["kᵍ_h"])
-    # Average number of contacts at work per strata
-    kᵍ_w = Float64.(pop_params_dict["kᵍ_w"])
-    # Degree of mobility per strata
-    pᵍ = Float64.(pop_params_dict["pᵍ"])
-    # Density factor
-    ξ = pop_params_dict["σ"]
-    # Average household size
-    σ = pop_params_dict["σ"]
-
-    edgelist = Array{Int64, 2}(network_df[:, 1:2])
-    Rᵢⱼ      = copy(network_df[:, 3])
-    edgelist, Rᵢⱼ = correct_self_loops(edgelist, Rᵢⱼ, M)
-    pop_params    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
-
-    return pop_params
-end
-
-function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
-                                    G_coords::Array{String, 1}, 
-                                    epi_params_dict::Dict)
-
-    # Scaling of the asymptomatic infectivity
-    scale_β = epi_params_dict["scale_β"]
-    # Infectivity of Symptomatic
-    βᴵ = epi_params_dict["βᴵ"]
-    # Infectivity of Asymptomatic
-    if haskey(epi_params_dict, "βᴬ")
-        βᴬ = epi_params_dict["βᴬ"]
-    elseif haskey(epi_params_dict, "scale_β")
-        βᴬ = scale_β * βᴵ
-    else
-        @error "Either βᴬ or scale_β should be provided"
-    end
-    # Exposed rate
-    ηᵍ = Float64.(epi_params_dict["ηᵍ"])
-    # Asymptomatic rate
-    αᵍ = Float64.(epi_params_dict["αᵍ"])
-    # Infectious rate
-    μᵍ = Float64.(epi_params_dict["μᵍ"])
-
-    # Waning immunity rate 
-    Λ = epi_params_dict["Λ"] 
-    # Reinfection rate
-    Γ = epi_params_dict["Γ"] 
-
-
-    ## EPIDEMIC PARAMETERS TRANSITION RATES VACCINATION
-
-    # Direct death probability
-    θᵍ = Float64.(reduce(hcat, [epi_params_dict["θᵍ"], epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"], 
-                                epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"]]) )
-    # Hospitalization probability
-    γᵍ = Float64.(reduce(hcat, [epi_params_dict["γᵍ"], epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"],
-                                epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"]]) )
-    # Fatality probability in ICU
-    ωᵍ = Float64.(reduce(hcat, [epi_params_dict["ωᵍ"], epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"], 
-                                epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"]]) )
-    # Pre-deceased rate
-    ζᵍ = Float64.(epi_params_dict["ζᵍ"])
-    # Pre-hospitalized in ICU rate
-    λᵍ = Float64.(epi_params_dict["λᵍ"])
-    # Death rate in ICU
-    ψᵍ = Float64.(epi_params_dict["ψᵍ"])
-    # ICU discharge rate
-    χᵍ = Float64.(epi_params_dict["χᵍ"])
-    # Relative risk reduction of the probability of infection
-    rᵥ = Float64.(epi_params_dict["rᵥ"])
-    # Relative risk reduction of the probability of transmission
-    kᵥ = Float64.(epi_params_dict["kᵥ"])
-
-    return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
-end
-
-function init_NPI_parameters_struct(npi_params_dict::Dict, kappa0_filename::String)
-    if !isnothing(kappa0_filename)
-        kappa0_filename = joinpath(data_path, kappa0_filename)
-        @info "- Loading κ₀ time series from $(kappa0_filename)"
-        κ₀_df = CSV.read(kappa0_filename, DataFrame);
-        # syncronize containment measures with simulation
-        @info "- Synchronizing to dates"
-        κ₀_df.time = map(x -> (x .- first_day).value + 1, κ₀_df.date)
-        # Timesteps when the containment measures will be applied
-        tᶜs = κ₀_df.time[:]
-        # Array of level of confinement
-        κ₀s = κ₀_df.reduction[:]
-        # Array of premeabilities of confined households
-        
-        ϕs_aux = Float64.(npi_params_dict["ϕs"])
-        δs_aux = Float64.(npi_params_dict["δs"])
-
-        #Supposing ϕs and δs are constant, while the confinement measures are applied
-        ϕs = fill(ϕs_aux[1], length(tᶜs))
-        δs = fill(δs_aux[1], length(tᶜs))
-
-    else
-        # Timesteps when the containment measures will be applied
-        tᶜs = npi_params_dict["tᶜs"]
-        # Array of level of confinement
-        κ₀s = npi_params_dict["κ₀s"]
-        # Array of premeabilities of confined households
-        ϕs = npi_params_dict["ϕs"]
-        # Array of social distancing measures
-        δs = npi_params_dict["δs"]
-    end
-
-    return NPI_Params(κ₀s, ϕs, δs, tᶜs)
-    
-end
-
-
 
 """
 save_simulation_hdf5(epi_params::Epidemic_Params,
@@ -358,4 +246,191 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
     nccreate(output_fname, "data", "G", G_coords, "M", M_coords, "T", T_coords, "V", V_coords, "epi_states", S_coords)
     ncwrite(compartments, output_fname, "data")
 
+end
+
+
+"""
+    store_R_eff(epi_params::Epidemic_Params,
+                population::Population_Params,
+                suffix::String,
+                folder::String;
+                τ::Int64 = 21)
+
+Compute and store the effective reproduction number R.
+
+# Arguments
+
+- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+  and the epidemic spreading information.
+- `population::Population_Params`: Structure that contains all the parameters
+  related with the population.
+- `suffix::String`: String used to identify the experiment.
+- `folder::String`: String containing the path where the results will be stored.
+
+# Optional
+
+- `τ::Int64 = 21`: kernel length.
+"""
+function store_R_eff(epi_params::Epidemic_Params,
+                     population::Population_Params,
+                     suffix::String,
+                     folder::String;
+                     τ::Int64 = 21)
+
+    Rᵢᵍ_eff, R_eff = compute_R_eff(epi_params, population, τ)
+
+    # Write the results
+    CSV.write(@sprintf("%s/output_Reff_%s.csv", folder, suffix), Rᵢᵍ_eff)
+    CSV.write(@sprintf("%s/output_Reff_total_%s.csv", folder, suffix), R_eff)
+end
+
+
+### ----------------------------------------------------------------------------
+### OUTPUT FUNCTIONS
+### ----------------------------------------------------------------------------
+
+"""
+    store_compartment(epi_params::Epidemic_Params,
+                      population::Population_Params,
+                      compartment::Char,
+                      suffix::String,
+                      folder::String)
+
+Store the evolution of the given epidemic compartment for each strata and patch.
+
+# Arguments
+
+- `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+  and the epidemic spreading information.
+- `population::Population_Params`: Structure that contains all the parameters
+  related with the population.
+- `compartment::String`: String indicating the compartment, one of: `"S"`,
+  `"E"`, `"A"`, `"I"`, `"PH"`, `"PD"`, `"HR"`, `"HD"`, `"D"`, `"R"`.
+- `suffix::String`: String used to identify the experiment.
+- `folder::String`: String containing the path to the folder where the results
+  will be stored.
+"""
+function store_compartment(epi_params::Epidemic_Params,
+                           population::Population_Params,
+                           compartment::String,
+                           suffix::String,
+                           folder::String)
+
+    M = population.M
+    G = population.G
+    T = epi_params.T
+    V = epi_params.V
+
+    # Init. dataframe
+    df = DataFrame()
+    df.strata = repeat(1:G, outer = T * M)
+    df.patch = repeat(1:M, inner = G, outer = T)
+    df.time = repeat(1:T, inner = G * M)
+
+    # Store number of cases
+    if compartment == "S"
+        df.cases = reshape(epi_params.ρˢᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "E"
+        df.cases = reshape(epi_params.ρᴱᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "A"
+        df.cases = reshape(epi_params.ρᴬᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "I"
+        df.cases = reshape(epi_params.ρᴵᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "PH"
+        df.cases = reshape(epi_params.ρᴾᴴᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "PD"
+        df.cases = reshape(epi_params.ρᴾᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "HR"
+        df.cases = reshape(epi_params.ρᴴᴿᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "HD"
+        df.cases = reshape(epi_params.ρᴴᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "D"
+        df.cases = reshape(epi_params.ρᴰᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    elseif compartment == "R"
+        df.cases = reshape(epi_params.ρᴿᵍᵥ .* population.nᵢᵍ, G * M * T * V)
+    end
+
+    CSV.write(@sprintf("%s/output_%s_%s.csv", folder, compartment, suffix), df)
+end
+
+
+"""
+    print_status(epi_params::Epidemic_Params,
+                 population::Population_Params,
+                 t::Int64)
+
+Print the status of the epidemic spreading.
+"""
+function print_status(epi_params::Epidemic_Params,
+                      population::Population_Params,
+                      t::Int64)
+
+    players  = sum((epi_params.ρˢᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴾᴰᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴱᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴬᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴵᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴾᴴᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴴᴿᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴿᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴰᵍᵥ[:, :, t, :] .+
+                    epi_params.CHᵢᵍᵥ[:, :, t, :] ) .* population.nᵢᵍ[:, :])
+
+    sus3 = sum((epi_params.ρˢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :])
+
+    infected = sum(epi_params.ρᴵᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :] .+
+                   epi_params.ρᴬᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :])
+
+    cases3    = sum((epi_params.ρᴾᴰᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴿᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴰᵍᵥ[:, :, t, 3]) .* population.nᵢᵍ[:, :])
+
+    icus     = sum((epi_params.ρᴴᴿᵍᵥ[:, :, t, :] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, :]) .* population.nᵢᵍ[:, :])
+
+    deaths   = sum(epi_params.ρᴰᵍᵥ[:, :, t, :] .* population.nᵢᵍ[:, :])
+
+    vaccine1 = sum((epi_params.ρˢᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴱᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴬᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴵᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴿᵍᵥ[:, :, t, 1] .+
+                    epi_params.ρᴰᵍᵥ[:, :, t, 1] .+
+                    epi_params.CHᵢᵍᵥ[:, :, t, 1] ) .* population.nᵢᵍ[:, :]) / population.N
+
+    vaccine2 = sum((epi_params.ρˢᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴱᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴬᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴵᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴿᵍᵥ[:, :, t, 2] .+
+                    epi_params.ρᴰᵍᵥ[:, :, t, 2] .+
+                    epi_params.CHᵢᵍᵥ[:, :, t, 2] ) .* population.nᵢᵍ[:, :]) / population.N
+
+    vaccine3 = sum((epi_params.ρˢᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴾᴰᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴱᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴬᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴵᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴾᴴᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴴᴰᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴴᴿᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴿᵍᵥ[:, :, t, 3] .+
+                    epi_params.ρᴰᵍᵥ[:, :, t, 3] .+
+                    epi_params.CHᵢᵍᵥ[:, :, t, 3] ) .* population.nᵢᵍ[:, :]) / population.N
+
+    formatted_output = @sprintf("Time: %d, players: %.2f, sus3: %.2f, cases3: %.2f, deaths: %.2f, vaccine1 = %.2f, vaccine2: %.2f, vaccine3: %.2f\n",
+    t, players, sus3, cases3, deaths, vaccine1, vaccine2, vaccine3 )
+    @info "$(formatted_output) "    
 end
