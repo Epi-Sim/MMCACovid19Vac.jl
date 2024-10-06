@@ -181,9 +181,9 @@
     save_simulation_netCDF(epi_params::Epidemic_Params, 
                                         population::Population_Params,
                                         output_fname::String;
-                                        G_coords= nothing,
-                                        M_coords = nothing,
-                                        T_coords = nothing
+                                        G_coords= String[],
+                                        M_coords = String[],
+                                        T_coords = String[]
                                         )
 
         Save the full simulations.
@@ -205,28 +205,24 @@
 function save_simulation_netCDF( epi_params::Epidemic_Params, 
                                 population::Population_Params,
                                 output_fname::String;
-                                G_coords = nothing,
-                                M_coords = nothing,
-                                T_coords = nothing,
-                                V_coords = nothing
+                                G_coords=String[], M_coords=String[], T_coords=String[]
                                 )
     G = population.G
     M = population.M
     T = epi_params.T
     V = epi_params.V
-    
-    S_coords = epi_params.CompLabels
-    V_coords = epi_params.VaccLabels
 
-    if isnothing(G_coords)
+    if length(G_coords) != G
         G_coords = collect(1:G)
     end
-    if isnothing(M_coords)
+    if length(M_coords) != M
         M_coords = collect(1:M)
     end
-    if isnothing(T_coords)
+    if length(T_coords) != T
         T_coords = collect(1:T) 
     end
+    
+    V_coords = epi_params.VaccLabels
 
     g_dim = NcDim("G", G, atts=Dict("description" => "Age strata", "Unit" => "unitless"), values=G_coords, unlimited=false)
     m_dim = NcDim("M", M, atts=Dict("description" => "Region", "Unit" => "unitless"), values=M_coords, unlimited=false)
@@ -273,9 +269,9 @@ end
 save_observables_netCDF(epi_params::Epidemic_Params, 
                                     population::Population_Params,
                                     output_fname::String;
-                                    G_coords= nothing,
-                                    M_coords = nothing,
-                                    T_coords = nothing
+                                    G_coords= String[],
+                                    M_coords = String[],
+                                    T_coords = String[]
                                     )
 
     Calculate and store observable varialbes from a simulation.
@@ -302,21 +298,19 @@ save_observables_netCDF(epi_params::Epidemic_Params,
 function save_observables_netCDF(   epi_params::Epidemic_Params, 
                                     population::Population_Params,
                                     output_fname::String;
-                                    G_coords = nothing,
-                                    M_coords = nothing,
-                                    T_coords = nothing
+                                    G_coords=String[], M_coords=String[], T_coords=String[]
                                 )
     G = population.G
     M = population.M
     T = epi_params.T
 
-    if isnothing(G_coords)
+    if length(G_coords) != G
         G_coords = collect(1:G)
     end
-    if isnothing(M_coords)
+    if length(M_coords) != M
         M_coords = collect(1:M)
     end
-    if isnothing(T_coords)
+    if length(T_coords) != T
         T_coords = collect(1:T) 
     end
 
