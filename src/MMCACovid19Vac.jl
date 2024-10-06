@@ -33,6 +33,7 @@ export create_default_epi_params,
 	create_config_template,
 	save_simulation_hdf5,
 	save_simulation_netCDF,
+	save_observables_netCDF,
 	store_R_eff,
 	print_status
 
