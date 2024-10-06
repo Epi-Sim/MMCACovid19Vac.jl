@@ -1,7 +1,7 @@
 {
 	"simulation": {
-		"first_day_simulation": "2020-03-10",
-		"last_day_simulation": "2020-04-15",
+		"start_date": "2020-03-10",
+		"end_date": "2020-04-15",
 		"save_full_output": true,
 		"save_time_step": null,
 		"output_folder": "output",
@@ -36,7 +36,7 @@
 		"risk_reduction_d": 0.05
 	},
 	"population_params": {
-		"age_labels": ["Y", "M", "O"],
+		"G_labels": ["Y", "M", "O"],
 		"C": [
 				[ 0.598,  0.38486, 0.01714],
 				[ 0.244,  0.721,   0.0353],
