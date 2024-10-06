@@ -269,8 +269,56 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
 
 end
 
+"""
+save_observables_netCDF(epi_params::Epidemic_Params, 
+                                    population::Population_Params,
+                                    output_fname::String;
+                                    G_coords= nothing,
+                                    M_coords = nothing,
+                                    T_coords = nothing
+                                    )
 
-function save_observables_netCDF( epi_params::Epidemic_Params, population::Population_Params, output_fname::String)
+    Calculate and store observable varialbes from a simulation.
+    Observables include new infected, new hospitalizations and new death.
+    Vaccination state is ignored by summing over vaccination state V.
+    - New daily infections         :   ρᴬᵍ .* nᵢᵍ .* αᵍ
+    - New daily hospitalizationsare:   ρᴬᵍ .* nᵢᵍ .* μᵍ .* (1 .- θᵍ) .* γᵍ
+    - New daily death              :   diff(ρᴰᵍ)
+
+    # Arguments
+
+    - `epi_params::Epidemic_Params`: Structure that contains all epidemic parameters
+    and the epidemic spreading information.
+    - `population::Population_Params`: Structure that contains all the parameters
+    related with the population.
+    - `output_fname::String`: Output filename.
+
+    ## Optional
+    - `G_coords = nothing`: Array::{String} of size G containing the labels for age strata
+    - `M_coords = nothing`: Array::{String} of size M containing the labels for the patches
+    - `T_coords = nothing`: Array::{String} of size t containing the labels for the time (dates)
+    - `export_time_t = -1`: Time step to ve saved instead of the full simulation.
+"""
+function save_observables_netCDF(   epi_params::Epidemic_Params, 
+                                    population::Population_Params,
+                                    output_fname::String;
+                                    G_coords = nothing,
+                                    M_coords = nothing,
+                                    T_coords = nothing
+                                )
+    G = population.G
+    M = population.M
+    T = epi_params.T
+
+    if isnothing(G_coords)
+        G_coords = collect(1:G)
+    end
+    if isnothing(M_coords)
+        M_coords = collect(1:M)
+    end
+    if isnothing(T_coords)
+        T_coords = collect(1:T) 
+    end
 
     g_dim = NcDim("G", G, atts=Dict("description" => "Age strata", "Unit" => "unitless"), values=G_coords, unlimited=false)
     m_dim = NcDim("M", M, atts=Dict("description" => "Region", "Unit" => "unitless"), values=M_coords, unlimited=false)
