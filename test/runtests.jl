@@ -159,8 +159,8 @@ simulation_dict = config["simulation"]
 pop_params_dict = config["population_params"]
 
 # Reading simulation start and end dates
-first_day = Date(simulation_dict["first_day_simulation"])
-last_day  = Date(simulation_dict["last_day_simulation"])
+first_day = Date(simulation_dict["start_date"])
+last_day  = Date(simulation_dict["end_date"])
 
 # Converting dates to time steps
 T = (last_day - first_day).value + 1
@@ -181,7 +181,7 @@ M_coords = map(String,metapop_df[:, "id"])
 M = length(M_coords)
 
 # Coordinates for each age strata (labels)
-G_coords = map(String, pop_params_dict["age_labels"])
+G_coords = map(String, pop_params_dict["G_labels"])
 G = length(G_coords)
 
 
@@ -301,3 +301,10 @@ end
 # @test size(initial_compartments) == (G, M, epi_params.V, epi_params.NumComps)
 # set_compartments!(epi_params, population, initial_compartments)
 # run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
+
+@testset "run_simulation" begin
+    output_fname = "compartments_full.nc"
+    run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
+    save_simulation_netCDF(epi_params, population, output_fname)
+end
+
