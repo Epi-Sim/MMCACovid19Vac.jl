@@ -113,7 +113,8 @@ function run_engine_io(engine::AbstractEngine, config::Dict, data_path::String, 
     simulation_dict = config["simulation"]
     output_format    = simulation_dict["output_format"]
     save_full_output = get(simulation_dict, "save_full_output", false)
-    time_step_tosave   = get(simulation_dict, "export_compartments_time_t", nothing)
+    save_obs_output  = get(simulation_dict, "save_observables", false)
+    time_step_tosave = get(simulation_dict, "export_compartments_time_t", nothing)
     output_path = joinpath(instance_path, "output")
 
     # if output_path does not exist, create it
@@ -133,6 +134,9 @@ function run_engine_io(engine::AbstractEngine, config::Dict, data_path::String, 
 
     if save_full_output
         save_full(epi_params, population, output_path, output_format; coords...)
+    end
+    if save_obs_output
+        save_observables(epi_params, population, output_path; coords...)
     end
     if time_step_tosave !== nothing
         save_time_step(epi_params, population, output_path, time_step_tosave)
