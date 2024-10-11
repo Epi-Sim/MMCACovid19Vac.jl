@@ -60,3 +60,18 @@ function save_time_step(epi_params, population, output_path::String, export_comp
     save_simulation_hdf5(epi_params, population, filename; 
                         export_time_t = export_compartments_time_t)
 end
+
+
+function save_observables(epi_params, population, output_path::String; 
+    G_coords=String[], M_coords=String[], T_coords=String[])
+
+    filename = joinpath(output_path, "observables.nc")
+    @info "Storing simulation observables output in NetCDF: $filename"
+    try
+        save_observables_netCDF(epi_params, population, filename; G_coords, M_coords, T_coords)
+    catch e
+        @error "Error saving simulation observables" exception=(e, catch_backtrace())
+        rethrow(e)
+    end
+    @info "done saving ??"
+end
