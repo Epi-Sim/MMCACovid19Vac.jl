@@ -333,8 +333,8 @@ function save_observables_netCDF(   epi_params::Epidemic_Params,
     data_dict["new_hospitalized"] = sum(  ((epi_params.ρᴵᵍᵥ  .* population.nᵢᵍ) .* hosp_rates), dims=4)[:,:,:,1]
 
     D = sum(epi_params.ρᴰᵍᵥ, dims=4)[:,:,:,1]
-    data_dict["new_death"] = zeros(size(D))
-    data_dict["new_death"][:, :, 2:end] = diff((D .* population.nᵢᵍ), dims=3)
+    data_dict["new_deaths"] = zeros(size(D))
+    data_dict["new_deaths"][:, :, 2:end] = diff((D .* population.nᵢᵍ), dims=3)
     
     isfile(output_fname) && rm(output_fname)
     NetCDF.create(output_fname, varlist, mode=NC_NETCDF4)
