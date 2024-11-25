@@ -9,11 +9,6 @@ include("io.jl")
 const ENGINES  = ["MMCACovid19Vac", "MMCACovid19"]
 const COMMANDS = ["run", "setup", "init"]
 
-abstract type AbstractEngine end
-
-# Add to this as we add more engines
-struct MMCACovid19VacEngine <: AbstractEngine end
-struct MMCACovid19Engine <: AbstractEngine end
 
 # Define a dictionary to map engine names to their types
 const ENGINE_TYPES = Dict(
@@ -60,7 +55,6 @@ function read_input_files(::AbstractEngine, config::Dict, data_path::String, ins
         mkpath(output_path)
     end
 
-
     #########################################################
     # Containment measures
     #########################################################
@@ -70,7 +64,6 @@ function read_input_files(::AbstractEngine, config::Dict, data_path::String, ins
     first_day = Date(simulation_dict["start_date"])
     npi_params = init_NPI_parameters_struct(data_path, npi_params_dict, kappa0_filename, first_day)
     # vac_parms = Vaccination_Params(tᵛs, ϵᵍs)
-
 
     #####################
     # Initial Condition
@@ -111,12 +104,13 @@ Run the engine using input files (which must be available in the data_path and i
 and save the output to the output folder.
 """
 function run_engine_io(engine::AbstractEngine, config::Dict, data_path::String, instance_path::String, init_condition_path::String)
-    simulation_dict = config["simulation"]
+    simulation_dict  = config["simulation"]
     output_format    = simulation_dict["output_format"]
+    first_day        = Date(simulation_dict["start_date"])
     save_full_output = get(simulation_dict, "save_full_output", false)
     save_obs_output  = get(simulation_dict, "save_observables", false)
-    time_step_tosave = get(simulation_dict, "export_compartments_time_t", nothing)
-    output_path = joinpath(instance_path, "output")
+    time_step_tosave = get(simulation_dict, "save_time_step", nothing)
+    output_path      = joinpath(instance_path, "output")
 
     # if output_path does not exist, create it
     if !isdir(output_path)
@@ -128,19 +122,21 @@ function run_engine_io(engine::AbstractEngine, config::Dict, data_path::String, 
     epi_params, population, coords = run_engine(engine, config, npi_params, network_df, metapop_df, initial_compartments)
 
     @info "\t- Save full output = " save_full_output
-    if time_step_tosave !== nothing
-        @info "\t- Save time step at t=" time_step_tosave
-        @assert time_step_tosave isa Int
-    end
-
     if save_full_output
-        save_full(epi_params, population, output_path, output_format; coords...)
+        save_full(engine, epi_params, population, output_path, output_format; coords...)
     end
     if save_obs_output
-        save_observables(epi_params, population, output_path; coords...)
+        save_observables(engine, epi_params, population, output_path; coords...)
     end
     if time_step_tosave !== nothing
-        save_time_step(epi_params, population, output_path, time_step_tosave)
+        export_date = first_day + Day(time_step_tosave - 1)
+        if  time_step_tosave <= epi_params.T
+            @info "Storing compartments at single date $(export_date):"
+            @info "\t- Simulation step: $(time_step_tosave)"
+            save_time_step(engine, epi_params, population, output_path, time_step_tosave, export_date)
+        else
+            @error "Can't save simulation step ($(time_step_tosave)) larget then the last time step ($(params.T))"
+        end
     end
 
     @info "done running engine io"
@@ -223,9 +219,9 @@ function run_engine(::MMCACovid19VacEngine, config::Dict, npi_params::NPI_Params
     ################ RUN THE SIMULATION ####################
     ########################################################
 
-    set_compartments!(epi_params, population, initial_compartments)
+    MMCACovid19Vac.set_compartments!(epi_params, population, initial_compartments)
 
-    run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
+    MMCACovid19Vac.run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
 
     return epi_params, population, Dict(:T_coords => T_coords, :G_coords => G_coords, :M_coords => M_coords)
 end
