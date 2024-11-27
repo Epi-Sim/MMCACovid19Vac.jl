@@ -6,15 +6,6 @@ using MMCACovid19Vac
 
 include("io.jl")
 
-const ENGINES  = ["MMCACovid19Vac", "MMCACovid19"]
-const COMMANDS = ["run", "setup", "init"]
-
-
-# Define a dictionary to map engine names to their types
-const ENGINE_TYPES = Dict(
-    "MMCACovid19Vac" => MMCACovid19VacEngine,
-    "MMCACovid19" => MMCACovid19Engine
-)
 
 function get_engine(engine_name::String)
     engine_type = get(ENGINE_TYPES, engine_name, nothing)
