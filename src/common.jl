@@ -7,3 +7,14 @@ struct MMCACovid19Engine <: AbstractEngine end
 
 struct NetCDFFormat <: AbstractOutputFormat end
 struct HDF5Format <: AbstractOutputFormat end
+
+
+const ENGINES  = ["MMCACovid19Vac", "MMCACovid19"]
+const COMMANDS = ["run", "setup", "init"]
+
+
+# Define a dictionary to map engine names to their types
+const ENGINE_TYPES = Dict(
+    "MMCACovid19Vac" => MMCACovid19VacEngine,
+    "MMCACovid19" => MMCACovid19Engine
+)
