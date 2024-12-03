@@ -282,16 +282,16 @@ function save_observables(engine::MMCACovid19Engine,
         varlist = [newI, newH, newD]
      
         data_dict = Dict()
-        data_dict["new_infected"] = sum((epi_params.ρᴬᵍ  .* population.nᵢᵍ), dims=(G)) .* epi_params.αᵍ
-    
+        data_dict["new_infected"] = (epi_params.ρᴬᵍ  .* population.nᵢᵍ) .* epi_params.αᵍ
+            
         hosp_rates = epi_params.μᵍ .* (1 .- epi_params.θᵍ) .* epi_params.γᵍ
         hosp_rates = reshape(hosp_rates, G, 1, 1)
-    
-        data_dict["new_hospitalized"] = sum(((epi_params.ρᴵᵍ  .* population.nᵢᵍ) .* hosp_rates), dims=3)
-    
-        D = sum(epi_params.ρᴰᵍ, dims=G)
+            
+        data_dict["new_hospitalized"] = ((epi_params.ρᴵᵍ  .* population.nᵢᵍ) .* hosp_rates)
+            
+        D = epi_params.ρᴰᵍ
         data_dict["new_deaths"] = zeros(size(D))
-        data_dict["new_deaths"][:, :, 2:end] = diff((D .* population.nᵢᵍ), dims=G)
+        data_dict["new_deaths"][:, :, 2:end] = diff((D .* population.nᵢᵍ), dims=3)
         
         isfile(filename) && rm(filename)
         NetCDF.create(filename, varlist, mode=NC_NETCDF4)
