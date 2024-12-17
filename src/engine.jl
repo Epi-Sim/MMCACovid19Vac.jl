@@ -34,6 +34,7 @@ end
 function read_input_files(::AbstractEngine, config::Dict, data_path::String, instance_path::String, init_condition_path::String)
     data_dict       = config["data"]
     simulation_dict = config["simulation"]
+    pop_params_dict = config["population_params"]
     npi_params_dict = config["NPI"]
     init_format      = get(simulation_dict, "init_format", "netcdf")
 
@@ -82,6 +83,9 @@ function read_input_files(::AbstractEngine, config::Dict, data_path::String, ins
     mobility_matrix_filename = joinpath(data_path, data_dict["mobility_matrix_filename"])
     network_df  = CSV.read(mobility_matrix_filename, DataFrame)
 
+    G_coords = map(String, pop_params_dict["G_labels"])
+    # use G_coords to guess the columns of the metapopulation file
+    type_dict = Dict()
     # Loading metapopulation patches info (surface, label, population by age)
     metapop_data_filename = joinpath(data_path, data_dict["metapopulation_data_filename"])
     metapop_df = CSV.read(metapop_data_filename, DataFrame, types=Dict("id" => String, 
