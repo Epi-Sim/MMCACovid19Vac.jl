@@ -276,6 +276,7 @@ function run_engine(::MMCACovid19Engine, config::Dict, npi_params::NPI_Params, n
     sᵢ = metapop_df[:, "area"]
     # Subpopulation by age strata
     nᵢᵍ = copy(transpose(Array{Float64,2}(metapop_df[:, G_coords])))
+    nᵢᵍ = round.( nᵢᵍ)
     # Age Contact Matrix
     C = Float64.(mapreduce(permutedims, vcat, pop_params_dict["C"]))
     # Average number of contacts per strata
