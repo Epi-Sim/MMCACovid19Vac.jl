@@ -116,7 +116,7 @@ function run_engine_io(engine::AbstractEngine, config::Dict, data_path::String, 
 
     epi_params, population, coords = run_engine(engine, config, npi_params, network_df, metapop_df, initial_compartments)
 
-    @info "\t- Save full output = " save_full_output
+    @info "\t- Save full output = $(save_full_output)" 
     if save_full_output
         save_full(engine, epi_params, population, output_path, output_format; coords...)
     end
@@ -142,7 +142,7 @@ Run the engine using Julia data structures as inputs. Does not save the output t
 
 TODO: decouple from MMCACovid19Vac.jl (NPI_Params)
 """
-function run_engine(::MMCACovid19VacEngine, config::Dict, npi_params::NPI_Params, network_df::DataFrame, metapop_df::DataFrame, initial_compartments::Array{Float64, 4})
+function run_engine(engine::MMCACovid19VacEngine, config::Dict, npi_params::NPI_Params, network_df::DataFrame, metapop_df::DataFrame, initial_compartments::Array{Float64, 4})
     @info "Running MMCACovid19VacEngine"
     simulation_dict = config["simulation"]
     epi_params_dict = config["epidemic_params"]
@@ -201,14 +201,15 @@ function run_engine(::MMCACovid19VacEngine, config::Dict, npi_params::NPI_Params
 
     ##################################################
 
-    @info "- Initializing MMCA epidemic simulations"
-    @info "\t- first_day_simulation = "  first_day
-    @info "\t- last_day_simulation = " last_day
-    @info "\t- G (agent class) = " G
-    @info "\t- M (n. of metapopulations) = "  M
-    @info "\t- T (simulation steps) = " T
-    @info "\t- V (vaccination states) = " epi_params.V
-    @info "\t- N. of epi compartments = " epi_params.NumComps
+    @info "- Initializing MMCA epidemic simulations for engine $(engine)"
+    @info "\t- N. of epi compartments = $(epi_params.NumComps)" 
+    @info "\t- G (agent class) = $(G)"
+    @info "\t- M (n. of metapopulations) = $(M)"
+    @info "\t- T (simulation steps) = $(T)"
+    @info "\t- V (vaccination states) = $(epi_params.V)"
+    @info "\t- first_day_simulation = $(first_day)"  
+    @info "\t- last_day_simulation = $(last_day)"
+
 
     ########################################################
     ################ RUN THE SIMULATION ####################
@@ -222,7 +223,7 @@ function run_engine(::MMCACovid19VacEngine, config::Dict, npi_params::NPI_Params
 end
 
 
-function run_engine(::MMCACovid19Engine, config::Dict, npi_params::NPI_Params, network_df::DataFrame, metapop_df::DataFrame, initial_compartments::Array{Float64, 3})
+function run_engine(engine::MMCACovid19Engine, config::Dict, npi_params::NPI_Params, network_df::DataFrame, metapop_df::DataFrame, initial_compartments::Array{Float64, 3})
     
     n_compartments = 10
 
@@ -359,15 +360,14 @@ function run_engine(::MMCACovid19Engine, config::Dict, npi_params::NPI_Params, n
 
     ##################################################
 
-    @info "- Initializing MMCA epidemic simulations"
-    @info "\t- first_day_simulation = "  first_day
-    @info "\t- last_day_simulation = " last_day
-    @info "\t- G (agent class) = " G
-    @info "\t- M (n. of metapopulations) = "  M
-    @info "\t- T (simulation steps) = " T
-    @info "\t- N. of epi compartments = " n_compartments
-
-
+    @info "- Initializing MMCA epidemic simulations for engine $(engine)"
+    @info "\t- N. of epi compartments = $(n_compartments)" 
+    @info "\t- G (agent class) = $(G)"
+    @info "\t- M (n. of metapopulations) = $(M)"
+    @info "\t- T (simulation steps) = $(T)"
+    @info "\t- first_day_simulation = $(first_day)"  
+    @info "\t- last_day_simulation = $(last_day)"
+    
     t₀ = 1
     epi_params.ρˢᵍ[:,:,t₀]  .= initial_compartments[:, :, 1] ./ population.nᵢᵍ
     epi_params.ρᴱᵍ[:,:,t₀]  .= initial_compartments[:, :, 2] ./ population.nᵢᵍ
