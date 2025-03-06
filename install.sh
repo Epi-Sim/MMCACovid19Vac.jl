@@ -35,5 +35,5 @@ if in_hpc_bsc; then
         -c 4 -n 1 \
         julia install.jl -c |&cat
 else
-    julia install.jl -c
+    julia install.jl -c -i
 fi

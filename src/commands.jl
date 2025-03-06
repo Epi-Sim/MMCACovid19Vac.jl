@@ -134,7 +134,47 @@ function execute_setup(args, engine)
     # df[!, "Total"] = sum(eachcol(df))
 end
 
-function execute_init()
+function execute_init(args)
+    config_fname  = args["config"]
+    data_folder   = args["data-folder"]
+    output_folder = args["out"]
+    seeds_fname = args["seeds"]
+
+    config          = JSON.parsefile(config_fname);
+    data_dict       = config["data"]
+    pop_params_dict = config["population_params"]
+    epi_params_dict = config["epidemic_params"]
+
+    output_fname = joinpath(output_folder, "initial_conditions_10.nc")
+
+    # Reading metapopulation Dataframe
+    metapop_data_filename = joinpath(data_folder, data_dict["metapopulation_data_filename"])
+    metapop_df = CSV.read(metapop_data_filename, DataFrame, types=Dict("id" => String, 
+    "area"=>Float64, "Y"=>Float64, "M"=>Float64, "O"=>Float64, "Total"=>Float64))
+
+    # Loading mobility network
+    mobility_matrix_filename = joinpath(data_folder, data_dict["mobility_matrix_filename"])
+    network_df  = CSV.read(mobility_matrix_filename, DataFrame)
+
+    # Metapopulations patches coordinates (labels)
+    M_coords = map(String,metapop_df[:, "id"])
+    M = length(M_coords)
+
+    # Coordinates for each age strata (labels)
+    G_coords = map(String, pop_params_dict["G_labels"])
+    G = length(G_coords)
+
+    T = 1
+
+    population = init_pop_param_struct(G, M, G_coords, pop_params_dict, metapop_df, network_df)
+    epi_params = init_epi_parameters_struct(G, M, T, G_coords, epi_params_dict)
+
+    S = epi_params.NumComps
+    comp_coords = epi_params.CompLabels
+    
+    V = epi_params.V
+    V_coords = epi_params.VaccLabels
+
     conditions₀ = CSV.read(seeds_fname, DataFrame)
     patches_idxs = Int.(conditions₀[:, "idx"])
     
@@ -193,7 +233,8 @@ function read_config()
     
     # Loading metapopulation patches info (surface, label, population by age)
     metapop_data_filename = joinpath(data_path, data_dict["metapopulation_data_filename"])
-    metapop_df = CSV.read(metapop_data_filename, DataFrame, types=Dict(:id => String))
+    metapop_df = CSV.read(metapop_data_filename, DataFrame, types= Dict("id"=>String, 
+        "area"=>Float64, "Y"=>Float64, "M"=>Float64, "O"=>Float64, "Total"=>Float64))
     
     # Loading mobility network
     mobility_matrix_filename = joinpath(data_path, data_dict["mobility_matrix_filename"])

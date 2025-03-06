@@ -14,6 +14,10 @@ function parse_commandline()
         "--compile", "-c"
             help = "Compile the simulator into a single precompiled excecutable"
             action = :store_true
+        "--incremental", "-i"
+            help = "Compile the simulator incrementally. NOT IN HPC!"
+            action = :store_true
+            default = false
         "--target", "-t"
             help = "Target folder where the single excecutable will be stored"
             default ="."
@@ -25,8 +29,13 @@ end
 
 args = parse_commandline()
 if args["compile"]
-    build_folder = "episim_build"
-    create_app(pwd(), build_folder, force=true, incremental=true)
+    build_folder = "build"
+    create_app(pwd(), build_folder, 
+        force=true, 
+        incremental=args["incremental"],
+        include_transitive_dependencies=true,
+        filter_stdlibs=false,
+        precompile_execution_file=["src/EpiSim.jl"])
     bin_path = abspath(joinpath(build_folder, "bin", "EpiSim"))
     symlink_path = joinpath(args["target"], "episim")
     if !islink(symlink_path)
