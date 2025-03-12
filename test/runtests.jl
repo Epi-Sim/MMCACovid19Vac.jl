@@ -102,14 +102,14 @@ risk_reduction_h  = 0.1
 risk_reduction_d  = 0.05
 
 # Direct death probability
-θᵍ = Float64.(reduce(hcat, [θᵍ, θᵍ * risk_reduction_dd, θᵍ * risk_reduction_dd]) )
+θᵍᵥ = Float64.(reduce(hcat, [θᵍ, θᵍ * risk_reduction_dd, θᵍ * risk_reduction_dd]) )
 # Hospitalization probability
-γᵍ = Float64.(reduce(hcat, [γᵍ, γᵍ * risk_reduction_h, γᵍ * risk_reduction_h]) )
+γᵍᵥ = Float64.(reduce(hcat, [γᵍ, γᵍ * risk_reduction_h, γᵍ * risk_reduction_h]) )
 # Fatality probability in ICU
-ωᵍ = Float64.(reduce(hcat, [ωᵍ, ωᵍ * risk_reduction_d, ωᵍ * risk_reduction_d]) )
+ωᵍᵥ = Float64.(reduce(hcat, [ωᵍ, ωᵍ * risk_reduction_d, ωᵍ * risk_reduction_d]) )
 
-epi_params = Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, 
-                             ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, 
+epi_params = Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍᵥ, γᵍᵥ, 
+                             ζᵍ, λᵍ, ωᵍᵥ, ψᵍ, χᵍ, 
                              Λ, Γ, rᵥ, kᵥ, 
                              G, M, T)
 
@@ -121,11 +121,11 @@ epi_params = Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ,
     # @test epi_params.ηᵍ == ηᵍ
     # @test epi_params.αᵍ == αᵍ
     # @test epi_params.μᵍ == μᵍ
-    # @test epi_params.θᵍ == θᵍ
-    # @test epi_params.γᵍ == γᵍ
+    # @test epi_params.θᵍᵥ == θᵍᵥ
+    # @test epi_params.γᵍᵥ == γᵍᵥ
     # @test epi_params.ζᵍ == ζᵍ
     # @test epi_params.λᵍ == λᵍ
-    # @test epi_params.ωᵍ == ωᵍ
+    # @test epi_params.ωᵍᵥ == ωᵍᵥ
     # @test epi_params.ψᵍ == ψᵍ
     # @test epi_params.χᵍ == χᵍ
     # @test epi_params.T == T
@@ -212,11 +212,11 @@ epi_params      = init_epi_parameters_struct(G, M, T, G_coords, epi_params_dict)
     @test epi_params.ηᵍ == epi_params_dict["ηᵍ"]
     # @test epi_params.αᵍ == αᵍ
     # @test epi_params.μᵍ == μᵍ
-    # @test epi_params.θᵍ == θᵍ
-    # @test epi_params.γᵍ == γᵍ
+    # @test epi_params.θᵍᵥ == θᵍᵥ
+    # @test epi_params.γᵍᵥ == γᵍᵥ
     # @test epi_params.ζᵍ == ζᵍ
     # @test epi_params.λᵍ == λᵍ
-    # @test epi_params.ωᵍ == ωᵍ
+    # @test epi_params.ωᵍᵥ == ωᵍᵥ
     # @test epi_params.ψᵍ == ψᵍ
     # @test epi_params.χᵍ == χᵍ
     # @test epi_params.T == T

@@ -15,11 +15,11 @@ Epidemic_Params
   - `ηᵍ::Array{Float64, 1}`: Exposed rate for each strata.
   - `αᵍ::Array{Float64, 1}`: Asymptomatic infectious rate for each strata.
   - `μᵍ::Array{Float64, 1}`: Infectious rate for each strata.
-  - `θᵍ::Array{Float64, 2}`: Direct death probability for each strata.
+  - `θᵍᵥ::Array{Float64, 2}`: Direct death probability for each age strata and vaccination state.
   - `γᵍ::Array{Float64, 2}`: ICU probability for each strata.
   - `ζᵍ::Array{Float64, 1}`: Pre-deceased rate for each strata.
   - `λᵍ::Array{Float64, 1}`: Pre-hospitalized in ICU rate for each strata.
-  - `ωᵍ::Array{Float64, 2}`: Fatality probability in ICU for each strata.
+  - `ωᵍᵥ::Array{Float64, 2}`: Fatality probability in ICU for each strata.
   - `ψᵍ::Array{Float64, 1}`: Death rate in iCU for each strata.
   - `χᵍ::Array{Float64, 1}`: ICU discharge rate for each strata.
   - `Λ::Float64`: Probability of losing the vaccine-acquired immunity
@@ -76,11 +76,11 @@ struct Epidemic_Params
     ηᵍ::Array{Float64, 1}
     αᵍ::Array{Float64, 1}
     μᵍ::Array{Float64, 1}
-    θᵍ::Array{Float64, 2}
-    γᵍ::Array{Float64, 2}
+    θᵍᵥ::Array{Float64, 2}
+    γᵍᵥ::Array{Float64, 2}
     ζᵍ::Array{Float64, 1}
     λᵍ::Array{Float64, 1}
-    ωᵍ::Array{Float64, 2}
+    ωᵍᵥ::Array{Float64, 2}
     ψᵍ::Array{Float64, 1}
     χᵍ::Array{Float64, 1}
     Λ::Float64
@@ -127,11 +127,11 @@ end
                     ηᵍ::Array{Float64, 1},
                     αᵍ::Array{Float64, 1},
                     μᵍ::Array{Float64, 1},
-                    θᵍ::Array{Float64, 2},
-                    γᵍ::Array{Float64, 2},
+                    θᵍᵥ::Array{Float64, 2},
+                    γᵍᵥ::Array{Float64, 2},
                     ζᵍ::Array{Float64, 1},
                     λᵍ::Array{Float64, 1},
-                    ωᵍ::Array{Float64, 2},
+                    ωᵍᵥ::Array{Float64, 2},
                     ψᵍ::Array{Float64, 1},
                     χᵍ::Array{Float64, 1},
                     Λ::Float64,
@@ -152,15 +152,15 @@ end
     rates for each strata.
   - `μᵍ::Array{Float64, 1}`: Vector of size ``G`` with infectious rates for each
     strata.
-  - `θᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with direct death probabilities
+  - `θᵍᵥ::Array{Float64, 2}`: Matrix of size ``GxV`` with direct death probabilities
     for each strata.
-  - `γᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with ICU probabilities for each
+  - `γᵍᵥ::Array{Float64, 2}`: Matrix of size ``GxV`` with ICU probabilities for each
     strata.
   - `ζᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-deceased rates for
     each strata.
   - `λᵍ::Array{Float64, 1}`: Vector of size ``G`` with pre-hospitalized in ICU
     rates for each strata.
-  - `ωᵍ::Array{Float64, 2}`: Matrix of size ``GxV`` with fatality probabilities in
+  - `ωᵍᵥ::Array{Float64, 2}`: Matrix of size ``GxV`` with fatality probabilities in
     ICU for each strata.
   - `ψᵍ::Array{Float64, 1}`: Vector of size ``G`` with death rates for each
     strata.
@@ -187,11 +187,11 @@ function Epidemic_Params(βᴵ::Float64,
                          ηᵍ::Array{Float64, 1},
                          αᵍ::Array{Float64, 1},
                          μᵍ::Array{Float64, 1},
-                         θᵍ::Array{Float64, 2},
-                         γᵍ::Array{Float64, 2},
+                         θᵍᵥ::Array{Float64, 2},
+                         γᵍᵥ::Array{Float64, 2},
                          ζᵍ::Array{Float64, 1},
                          λᵍ::Array{Float64, 1},
-                         ωᵍ::Array{Float64, 2},
+                         ωᵍᵥ::Array{Float64, 2},
                          ψᵍ::Array{Float64, 1},
                          χᵍ::Array{Float64, 1},
                          Λ::Float64,
@@ -221,7 +221,7 @@ function Epidemic_Params(βᴵ::Float64,
     Qᵢᵍ   = zeros(Float64, G, M, T)
     
     return Epidemic_Params([βᴵ], [βᴬ], copy(ηᵍ), copy(αᵍ), copy(μᵍ),
-                           copy(θᵍ), copy(γᵍ), copy(ζᵍ), copy(λᵍ), copy(ωᵍ),
+                           copy(θᵍᵥ), copy(γᵍᵥ), copy(ζᵍ), copy(λᵍ), copy(ωᵍᵥ),
                            copy(ψᵍ), copy(χᵍ), copy(Λ), copy(Γ), copy(rᵥ), copy(kᵥ), 
                            G, M, T, V, NumComps, CompLabels, VaccLabels, 
                            ρˢᵍᵥ, ρᴱᵍᵥ, ρᴬᵍᵥ, ρᴵᵍᵥ, ρᴾᴴᵍᵥ, ρᴾᴰᵍᵥ, ρᴴᴿᵍᵥ, ρᴴᴰᵍᵥ, ρᴰᵍᵥ, 
@@ -236,11 +236,11 @@ function update_epidemic_params!(epi_params::Epidemic_Params, data_dict::Dict{St
   epi_params.ηᵍ = has_key("ηᵍ") ? data_dict["ηᵍ"] : epi_params.ηᵍ
   epi_params.αᵍ = has_key("αᵍ") ? data_dict["αᵍ"] : epi_params.αᵍ
   epi_params.μᵍ = has_key("μᵍ") ? data_dict["μᵍ"] : epi_params.μᵍ
-  epi_params.θᵍ = has_key("θᵍ") ? data_dict["θᵍ"] : epi_params.θᵍ
-  epi_params.γᵍ = has_key("γᵍ") ? data_dict["γᵍ"] : epi_params.γᵍ
+  epi_params.θᵍᵥ = has_key("θᵍ") ? data_dict["θᵍ"] : epi_params.θᵍᵥ
+  epi_params.γᵍᵥ = has_key("γᵍ") ? data_dict["γᵍ"] : epi_params.γᵍᵥ
   epi_params.ζᵍ = has_key("ζᵍ") ? data_dict["ζᵍ"] : epi_params.ζᵍ
   epi_params.λᵍ = has_key("λᵍ") ? data_dict["λᵍ"] : epi_params.λᵍ
-  epi_params.ωᵍ = has_key("ωᵍ") ? data_dict["ωᵍ"] : epi_params.ωᵍ
+  epi_params.ωᵍᵥ = has_key("ωᵍ") ? data_dict["ωᵍ"] : epi_params.ωᵍᵥ
   epi_params.ψᵍ = has_key("ψᵍ") ? data_dict["ψᵍ"] : epi_params.ψᵍ
   epi_params.χᵍ = has_key("χᵍ") ? data_dict["χᵍ"] : epi_params.χᵍ
   epi_params.Λ  = has_key("Λ")  ? data_dict["Λ"] : epi_params.Λ
@@ -572,13 +572,13 @@ function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
     ## EPIDEMIC PARAMETERS TRANSITION RATES VACCINATION
 
     # Direct death probability
-    θᵍ = Float64.(reduce(hcat, [epi_params_dict["θᵍ"], epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"], 
+    θᵍᵥ = Float64.(reduce(hcat, [epi_params_dict["θᵍ"], epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"], 
                                 epi_params_dict["θᵍ"] * epi_params_dict["risk_reduction_dd"]]) )
     # Hospitalization probability
-    γᵍ = Float64.(reduce(hcat, [epi_params_dict["γᵍ"], epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"],
+    γᵍᵥ = Float64.(reduce(hcat, [epi_params_dict["γᵍ"], epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"],
                                 epi_params_dict["γᵍ"] * epi_params_dict["risk_reduction_h"]]) )
     # Fatality probability in ICU
-    ωᵍ = Float64.(reduce(hcat, [epi_params_dict["ωᵍ"], epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"], 
+    ωᵍᵥ = Float64.(reduce(hcat, [epi_params_dict["ωᵍ"], epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"], 
                                 epi_params_dict["ωᵍ"] * epi_params_dict["risk_reduction_d"]]) )
     # Pre-deceased rate
     ζᵍ = Float64.(epi_params_dict["ζᵍ"])
@@ -593,7 +593,7 @@ function init_epi_parameters_struct(G::Int64, M::Int64, T::Int64,
     # Relative risk reduction of the probability of transmission
     kᵥ = Float64.(epi_params_dict["kᵥ"])
 
-    return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍ, γᵍ, ζᵍ, λᵍ, ωᵍ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
+    return Epidemic_Params(βᴵ, βᴬ, ηᵍ, αᵍ, μᵍ, θᵍᵥ, γᵍᵥ, ζᵍ, λᵍ, ωᵍᵥ, ψᵍ, χᵍ, Λ, Γ, rᵥ, kᵥ, G, M, T)
 end
 
 function init_NPI_parameters_struct(data_path::String, npi_params_dict::Dict, kappa0_filename::Union{String, Nothing}, first_day::Date)

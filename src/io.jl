@@ -327,7 +327,7 @@ function save_observables_netCDF(   epi_params::Epidemic_Params,
     data_dict = Dict()
     data_dict["new_infected"] = sum((epi_params.ρᴬᵍᵥ  .* population.nᵢᵍ), dims=(4))[:,:,:,1] .* epi_params.αᵍ
 
-    hosp_rates = epi_params.μᵍ .* (1 .- epi_params.θᵍ) .* epi_params.γᵍ
+    hosp_rates = epi_params.μᵍ .* (1 .- epi_params.θᵍᵥ) .* epi_params.γᵍᵥ
     hosp_rates = reshape(hosp_rates, 3, 1, 1, 3)
 
     data_dict["new_hospitalized"] = sum(  ((epi_params.ρᴵᵍᵥ  .* population.nᵢᵍ) .* hosp_rates), dims=4)[:,:,:,1]

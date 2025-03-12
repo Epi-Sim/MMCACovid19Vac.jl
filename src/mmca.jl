@@ -32,11 +32,11 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
     ηᵍ = epi_params.ηᵍ
     αᵍ = epi_params.αᵍ
     μᵍ = epi_params.μᵍ
-    θᵍ = epi_params.θᵍ
-    γᵍ = epi_params.γᵍ
+    θᵍᵥ = epi_params.θᵍᵥ
+    γᵍᵥ = epi_params.γᵍᵥ
     ζᵍ = epi_params.ζᵍ
     λᵍ = epi_params.λᵍ
-    ωᵍ = epi_params.ωᵍ
+    ωᵍᵥ = epi_params.ωᵍᵥ
     ψᵍ = epi_params.ψᵍ
     χᵍ = epi_params.χᵍ
     rᵥ = epi_params.rᵥ
@@ -170,19 +170,19 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                     αᵍ[g] * ρᴬᵍᵥ[g, i, t, v]
 
                 ρᴾᴴᵍᵥ[g, i, t + 1, v] = (1 - λᵍ[g]) * ρᴾᴴᵍᵥ[g, i, t, v] +
-                    μᵍ[g] * (1 - θᵍ[g, v]) * γᵍ[g, v] *  ρᴵᵍᵥ[g, i, t, v]
+                    μᵍ[g] * (1 - θᵍᵥ[g, v]) * γᵍᵥ[g, v] *  ρᴵᵍᵥ[g, i, t, v]
 
                 ρᴾᴰᵍᵥ[g, i, t + 1, v] = (1 - ζᵍ[g]) * ρᴾᴰᵍᵥ[g, i, t, v] +
-                    μᵍ[g] * θᵍ[g, v] * ρᴵᵍᵥ[g, i, t, v]
+                    μᵍ[g] * θᵍᵥ[g, v] * ρᴵᵍᵥ[g, i, t, v]
 
                 ρᴴᴿᵍᵥ[g, i, t + 1, v] = (1 - χᵍ[g]) * ρᴴᴿᵍᵥ[g, i, t, v] +
-                    λᵍ[g] * (1 - ωᵍ[g, v] ) * ρᴾᴴᵍᵥ[g, i, t, v]
+                    λᵍ[g] * (1 - ωᵍᵥ[g, v] ) * ρᴾᴴᵍᵥ[g, i, t, v]
 
                 ρᴴᴰᵍᵥ[g, i, t + 1, v] = (1 - ψᵍ[g]) * ρᴴᴰᵍᵥ[g, i, t, v] +
-                    λᵍ[g] * ωᵍ[g, v] * ρᴾᴴᵍᵥ[g, i, t, v]
+                    λᵍ[g] * ωᵍᵥ[g, v] * ρᴾᴴᵍᵥ[g, i, t, v]
 
                 ρᴿᵍᵥ[g, i, t + 1, v] = ρᴿᵍᵥ[g, i, t, v] + χᵍ[g] * ρᴴᴿᵍᵥ[g, i, t, v] +
-                    μᵍ[g] * (1 - θᵍ[g, v]) * (1 - γᵍ[g, v]) * ρᴵᵍᵥ[g, i , t, v] -
+                    μᵍ[g] * (1 - θᵍᵥ[g, v]) * (1 - γᵍᵥ[g, v]) * ρᴵᵍᵥ[g, i , t, v] -
                     Γ * ρᴿᵍᵥ[g, i, t, v] 
 
                 ρᴰᵍᵥ[g, i, t + 1, v] = ρᴰᵍᵥ[g, i, t, v] + ζᵍ[g] * ρᴾᴰᵍᵥ[g, i, t, v] +
