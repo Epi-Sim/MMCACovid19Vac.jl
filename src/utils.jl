@@ -619,6 +619,13 @@ function init_NPI_parameters_struct(κ₀_df::Union{DataFrame, Nothing}, npi_par
         # Existing logic for when κ₀_df is a DataFrame
         @info "- Synchronizing to dates"
         κ₀_df.time = map(x -> (x .- first_day).value + 1, κ₀_df.date)
+        
+        if sum(κ₀_df.time .< 1) > 0
+            @warn "Some confinement dates are before the first day of the simulation"
+            @warn "Removing kappa values before the first day of the simulation"
+            κ₀_df = κ₀_df[κ₀_df.time .>= 1, :]
+        end
+        
         # Timesteps when the containment measures will be applied
         tᶜs = κ₀_df.time[:]
         # Array of level of confinement
