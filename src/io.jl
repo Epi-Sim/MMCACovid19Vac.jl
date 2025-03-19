@@ -165,6 +165,7 @@
         compartments[:, :, :, :, 8]  .= epi_params.ρᴴᴰᵍᵥ .* population.nᵢᵍ
         compartments[:, :, :, :, 9]  .= epi_params.ρᴿᵍᵥ .* population.nᵢᵍ
         compartments[:, :, :, :, 10] .= epi_params.ρᴰᵍᵥ .* population.nᵢᵍ
+        compartments[:, :, :, :, 11] .= epi_params.CHᵢᵍᵥ .* population.nᵢᵍ
         if export_time_t > 0
             h5open(output_fname, "w") do file
                 write(file, "data", compartments[:,:,export_time_t,:,:])
@@ -230,20 +231,21 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
     v_dim = NcDim("V", V, atts=Dict("description" => "Vaccination status", "Unit" => "unitless"), values=V_coords, unlimited=false)
     dimlist = [g_dim, m_dim, t_dim, v_dim]
 
-    S  = NcVar("S" , dimlist; atts=atts=Dict("description" => "Suceptibles"), t=Float64, compress=-1)
-    E  = NcVar("E" , dimlist; atts=atts=Dict("description" => "Exposed"), t=Float64, compress=-1)
-    A  = NcVar("A" , dimlist; atts=atts=Dict("description" => "Asymptomatic"), t=Float64, compress=-1)
-    I  = NcVar("I" , dimlist; atts=atts=Dict("description" => "Infected"), t=Float64, compress=-1)
-    PH = NcVar("PH", dimlist; atts=atts=Dict("description" => "Pre-hospitalized"), t=Float64, compress=-1)
-    PD = NcVar("PD", dimlist; atts=atts=Dict("description" => "Pre-deceased"), t=Float64, compress=-1)
-    HR = NcVar("HR", dimlist; atts=atts=Dict("description" => "Hospitalized-good"), t=Float64, compress=-1)
-    HD = NcVar("HD", dimlist; atts=atts=Dict("description" => "Hospitalized-bad"), t=Float64, compress=-1)
-    R  = NcVar("R" , dimlist; atts=atts=Dict("description" => "Recovered"), t=Float64, compress=-1)
-    D  = NcVar("D" , dimlist; atts=atts=Dict("description" => "Dead"), t=Float64, compress=-1)
-    varlist = [S, E, A, I, PH, PD, HR, HD, R, D]
+    S  = NcVar("S" , dimlist; atts=Dict("description" => "Suceptibles"), t=Float64, compress=-1)
+    E  = NcVar("E" , dimlist; atts=Dict("description" => "Exposed"), t=Float64, compress=-1)
+    A  = NcVar("A" , dimlist; atts=Dict("description" => "Asymptomatic"), t=Float64, compress=-1)
+    I  = NcVar("I" , dimlist; atts=Dict("description" => "Infected"), t=Float64, compress=-1)
+    PH = NcVar("PH", dimlist; atts=Dict("description" => "Pre-hospitalized"), t=Float64, compress=-1)
+    PD = NcVar("PD", dimlist; atts=Dict("description" => "Pre-deceased"), t=Float64, compress=-1)
+    HR = NcVar("HR", dimlist; atts=Dict("description" => "Hospitalized-good"), t=Float64, compress=-1)
+    HD = NcVar("HD", dimlist; atts=Dict("description" => "Hospitalized-bad"), t=Float64, compress=-1)
+    R  = NcVar("R" , dimlist; atts=Dict("description" => "Recovered"), t=Float64, compress=-1)
+    D  = NcVar("D" , dimlist; atts=Dict("description" => "Dead"), t=Float64, compress=-1)
+    CH  = NcVar("CH" , dimlist; atts=Dict("description" => "Confined"), t=Float64, compress=-1)
+    varlist = [S, E, A, I, PH, PD, HR, HD, R, D, CH]
 
     data_dict = Dict()
-    data_dict["S"]  = (epi_params.ρˢᵍᵥ + epi_params.CHᵢᵍᵥ) .* population.nᵢᵍ
+    data_dict["S"]  = epi_params.ρˢᵍᵥ .* population.nᵢᵍ
     data_dict["E"]  = epi_params.ρᴱᵍᵥ  .* population.nᵢᵍ
     data_dict["A"]  = epi_params.ρᴬᵍᵥ  .* population.nᵢᵍ
     data_dict["I"]  = epi_params.ρᴵᵍᵥ  .* population.nᵢᵍ
@@ -253,6 +255,7 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
     data_dict["HD"] = epi_params.ρᴴᴰᵍᵥ .* population.nᵢᵍ
     data_dict["R"]  = epi_params.ρᴿᵍᵥ  .* population.nᵢᵍ
     data_dict["D"]  = epi_params.ρᴰᵍᵥ  .* population.nᵢᵍ
+    data_dict["CH"] = epi_params.CHᵢᵍᵥ .* population.nᵢᵍ
 
     isfile(output_fname) && rm(output_fname)
 
