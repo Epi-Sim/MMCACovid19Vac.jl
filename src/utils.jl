@@ -63,8 +63,8 @@ Epidemic_Params
     strata, patch and vaccination status.
 
 # Auxiliary
-  - `CHᵢᵍᵥ::Array{Float64, 3}`: Fraction of securely confined individuals for each
-    strata and patch.
+  - `CHᵢᵍᵥ::Array{Float64, 4}`: Fraction of securely confined individuals for each
+    strata, patch and time step.
   - `Qᵢᵍ::Array{Float64, 3}`: Suceptible contacts available for each strata on a
     given patch.
 
