@@ -202,9 +202,9 @@ function Epidemic_Params(βᴵ::Float64,
                          M::Int64,
                          T::Int64)
 
-    NumComps = 10
+    NumComps = 11
     V = 3
-    CompLabels = ["S", "E", "A", "I", "PH", "PD", "HR", "HD", "R", "D"]
+    CompLabels = ["S", "E", "A", "I", "PH", "PD", "HR", "HD", "R", "D", "CH"]
     VaccLabels = ["NV", "V", "PV"]
     # Allocate memory for simulations
     ρˢᵍᵥ  = zeros(Float64, G, M, T, V)
