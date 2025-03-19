@@ -666,6 +666,7 @@ function set_compartments!(epi_params, population,
             epi_params.ρᴴᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 8] ./ population.nᵢᵍ
             epi_params.ρᴿᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 9] ./ population.nᵢᵍ
             epi_params.ρᴰᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 10] ./ population.nᵢᵍ
+            epi_params.CHᵢᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 11] ./ population.nᵢᵍ
         end
     else
         for i in 1:V
@@ -679,6 +680,7 @@ function set_compartments!(epi_params, population,
             epi_params.ρᴴᴰᵍᵥ[:,:,t₀,i] .= initial_compartments[:, :, i, 8] 
             epi_params.ρᴿᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 9] 
             epi_params.ρᴰᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 10]
+            epi_params.CHᵢᵍᵥ[:,:,t₀,i]  .= initial_compartments[:, :, i, 11]
         end
     end
 
@@ -692,6 +694,7 @@ function set_compartments!(epi_params, population,
     epi_params.ρᴴᴰᵍᵥ[isnan.(epi_params.ρᴴᴰᵍᵥ)] .= 0
     epi_params.ρᴿᵍᵥ[isnan.(epi_params.ρᴿᵍᵥ)]   .= 0
     epi_params.ρᴰᵍᵥ[isnan.(epi_params.ρᴰᵍᵥ)]   .= 0
+    epi_params.CHᵢᵍᵥ[isnan.(epi_params.CHᵢᵍᵥ)]   .= 0
 end
 
 
