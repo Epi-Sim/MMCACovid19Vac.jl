@@ -319,9 +319,9 @@ function save_observables_netCDF(   epi_params::Epidemic_Params,
     t_dim = NcDim("T", T, atts=Dict("description" => "Time", "Unit" => "unitless"), values=T_coords, unlimited=false)
     dimlist = [g_dim, m_dim, t_dim]
 
-    newI  = NcVar("new_infected" , dimlist; atts=atts=Dict("description" => "Suceptibles"), t=Float64, compress=-1)
-    newH  = NcVar("new_hospitalized" , dimlist; atts=atts=Dict("description" => "Exposed"), t=Float64, compress=-1)
-    newD  = NcVar("new_deaths" , dimlist; atts=atts=Dict("description" => "Asymptomatic"), t=Float64, compress=-1)
+    newI  = NcVar("new_infected" , dimlist; atts=Dict("description" => "Daily infections"), t=Float64, compress=-1)
+    newH  = NcVar("new_hospitalized" , dimlist; atts=Dict("description" => "Daily hospitalizations"), t=Float64, compress=-1)
+    newD  = NcVar("new_deaths" , dimlist; atts=Dict("description" => "Daily deaths"), t=Float64, compress=-1)
     varlist = [newI, newH, newD]
  
     data_dict = Dict()
