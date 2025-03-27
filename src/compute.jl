@@ -28,13 +28,42 @@ Tuple formed by:
 - DataFrame containing information about the evolution of the total effective
   reproduction number R.
 """
-function compute_R_eff(epi_params::Epidemic_Params,
+function compute_R_eff_dataframe(epi_params::Epidemic_Params,
                        population::Population_Params,
                        τ::Int64 = 21)
 
     M = population.M
     G = population.G
-    T = epi_params.T - 1 # because we have to cut out the case t=1
+    T = epi_params.T
+    V = epi_params.V
+    
+
+    # Initialize results
+    Rᵢᵍ_eff = DataFrame()
+    Rᵢᵍ_eff.strata = repeat(1:G, outer = (T - τ) * M * V)
+    Rᵢᵍ_eff.vaccine = repeat(1:V, inner = G, outer = (T - τ) * M)
+    Rᵢᵍ_eff.patch = repeat(1:M, inner = G * V, outer = (T - τ))
+    Rᵢᵍ_eff.time = repeat(1:(T - τ), inner = G * M * V)
+
+    R_eff = DataFrame()
+    R_eff.time = 1:(T - τ)
+
+    # Compute R
+    Rᵢᵍᵥ, Rᵍ, R, Rᵥ, Rᵍᵥ, Rᵢᵍ = compute_R_eff_matrix(epi_params, population, τ)
+
+    Rᵢᵍ_eff.R_eff = reshape(Rᵢᵍᵥ, G * M * (T - τ) * V)
+    R_eff.R_eff = R
+
+    return Rᵢᵍ_eff, Rᵍ, R_eff, Rᵥ, Rᵍᵥ
+end
+
+function compute_R_eff_matrix(epi_params::Epidemic_Params,
+                       population::Population_Params,
+                       τ::Int64 = 21)
+
+    M = population.M
+    G = population.G
+    T = epi_params.T
     V = epi_params.V
     
     βᴬ = epi_params.βᴬ[1]
@@ -53,15 +82,7 @@ function compute_R_eff(epi_params::Epidemic_Params,
     tʷ = 0:(τ - 1)
     wᵍᵥ = ones(Float64, G, τ, V)
 
-    # Initialize results
-    Rᵢᵍ_eff = DataFrame()
-    Rᵢᵍ_eff.strata = repeat(1:G, outer = (T - τ) * M * V)
-    Rᵢᵍ_eff.vaccine = repeat(1:V, inner = G, outer = (T - τ) * M)
-    Rᵢᵍ_eff.patch = repeat(1:M, inner = G * V, outer = (T - τ))
-    Rᵢᵍ_eff.time = repeat(1:(T - τ), inner = G * M * V)
-
-    R_eff = DataFrame()
-    R_eff.time = 1:(T - τ)
+    
     Δρ = ones(G, M, T - τ, V)
 
     # Compute R
@@ -95,13 +116,8 @@ function compute_R_eff(epi_params::Epidemic_Params,
         
     end
 
-    Rᵢᵍ_eff.R_eff = reshape(Rᵢᵍᵥ, G * M * (T - τ) * V)
-    R_eff.R_eff = R
-
-    return Rᵢᵍ_eff, Rᵍ, R_eff, Rᵥ, Rᵍᵥ
+    return Rᵢᵍᵥ, Rᵍ, R, Rᵥ, Rᵍᵥ, Rᵢᵍ
 end
-
-
 """
     Function whose purpose is to find all the local maxima in a vector. The output is a list of two vectors, one containing all the heights 
     of said maxima, the other containing all the positions
