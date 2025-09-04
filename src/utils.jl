@@ -639,6 +639,7 @@ function init_NPI_parameters_struct(κ₀_df::Union{DataFrame, Nothing}, npi_par
         ϕs = fill(ϕs_aux[1], length(tᶜs))
         # Array of social distancing measures
         δs = fill(δs_aux[1], length(tᶜs))
+        δs[κ₀s .== 0.] .= 0.0
     end
 
     return NPI_Params(κ₀s, ϕs, δs, tᶜs)
