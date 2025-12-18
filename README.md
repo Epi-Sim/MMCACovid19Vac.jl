@@ -1,7 +1,6 @@
-
 # MMCACovid19Vac
 
-MicroMArkovEpi is a Julia package for simulating epidemic simulation of metapopulation. The package is based on two previous implementations:
+MMCACovid19Vac is a Julia package for simulating epidemic dynamics in a metapopulation, with built-in support for modeling vaccination campaigns. The package is based on two previous implementations:
 * MMCAcovid19 Julia package [https://docs.juliahub.com/MMCAcovid19/]([url](https://docs.juliahub.com/MMCAcovid19/))
 * MMCA_with_vaccination [https://github.com/PGcastioni/MMCA_with_vaccination/]([url](https://github.com/PGcastioni/MMCA_with_vaccination/))
 
