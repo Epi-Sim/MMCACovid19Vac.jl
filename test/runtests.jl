@@ -154,9 +154,9 @@ data_path       = "data"
 config_fname    = joinpath(data_path, "config_test.json")
 config          = JSON.parsefile(config_fname)
 
-data_dict       = config["data"]
-simulation_dict = config["simulation"]
-pop_params_dict = config["population_params"]
+data_dict       = Dict(config["data"])
+simulation_dict = Dict(config["simulation"])
+pop_params_dict = Dict(config["population_params"])
 
 # Reading simulation start and end dates
 first_day = Date(simulation_dict["start_date"])
@@ -204,7 +204,7 @@ end
 
 
 
-epi_params_dict = config["epidemic_params"]
+epi_params_dict = Dict(config["epidemic_params"])
 epi_params      = init_epi_parameters_struct(G, M, T, G_coords, epi_params_dict)
 @testset "init_epi_parameters_struct" begin
     # @test epi_params.βᴵ[1] == βᴵ
@@ -242,7 +242,7 @@ end
 # Containment measures
 #########################################################
 
-npi_params_dict = config["NPI"]
+npi_params_dict = Dict(config["NPI"])
 # Daily Mobility reduction
 kappa0_filename = get(data_dict, "kappa0_filename", nothing)
 npi_params = init_NPI_parameters_struct(data_path, npi_params_dict, kappa0_filename, first_day)
@@ -251,7 +251,7 @@ npi_params = init_NPI_parameters_struct(data_path, npi_params_dict, kappa0_filen
 # Vaccination parameters
 #########################################################
 
-vac_params_dict = config["vaccination"]
+vac_params_dict = Dict(config["vaccination"])
 start_vacc = vac_params_dict["start_vacc"]
 dur_vacc   = vac_params_dict["dur_vacc"]
 end_vacc   = start_vacc + dur_vacc
