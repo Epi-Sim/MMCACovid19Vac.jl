@@ -31,20 +31,21 @@ We will maintain the **Baseline** (static) mobility and generate a **Transient**
 
 ## 2. Algorithms
 
-### A. IPFP Solver (Sparse)
+### B. IPFP Solver (Sparse)
 
 We use IPFP to generate a valid stochastic matrix $R(t)$ from the baseline $B$ and noisy marginal targets $O(t), D(t)$.
 
 ```julia
-function ipfp_sparse(edgelist, B, O_target, D_target; max_iter=20)
+function ipfp_sparse(edgelist, B, O_target, D_target; max_iter=20, tol=1e-6)
     F = copy(B) # Start with baseline structure
     # ... Iterative row/col scaling ...
+    # Check convergence on column sums
     # Final step: Enforce strict row-stochasticity (sum_j R_ij = 1.0)
     return F_normalized
 end
 ```
 
-### B. The "Ghost Population" Fix (Auxiliary Updates)
+### C. The "Ghost Population" Fix (Auxiliary Updates)
 
 The standard `update_prob!` only updates population params when a confinement event ($t=t_c$) occurs. We must inject a new update routine that runs **every timestep**.
 
@@ -57,6 +58,8 @@ The standard `update_prob!` only updates population params when a confinement ev
 
 **Noisy MMCA Flow:**
 1.  **Generate $R(t)$**: Apply IPFP to baseline `population.Rᵢⱼ`.
+    *   **Unbiased Noise:** Targets are generated via $O_i(t) = O_i \cdot \exp(\mathcal{N}(0, \sigma) - \sigma^2/2)$ to ensuring the mean remains 1.0.
+    *   **Local RNG:** Uses a task-local `MersenneTwister` seeded by `mobility_rng_seed + t` for thread-safe reproducibility.
 2.  **Update Auxiliaries**: Call `compute_effective_population!` using $R(t)$ and current $p^g_{eff}$.
     *   *Note: We must be careful not to permanently overwrite the static `population` fields if we want to revert to baseline, or we simply accept `population` represents the "current state". Given the loop structure, updating `population` in-place is the most efficient and standard way, as long as we use the immutable `R_base` for the next step's generation.*
 3.  **Compute $P$ & $\Pi$**: Proceed as normal.
