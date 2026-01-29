@@ -62,6 +62,11 @@
         population["pᵍ"] = [0.0, 1.0, 0.00]
         population["ξ"] = 0.01
         population["σ"] = 2.5
+
+        # Mobility variation parameters
+        population["mobility_variation_type"] = "none"
+        population["mobility_sigma_O"] = 0.0
+        population["mobility_sigma_D"] = 0.0
         
         return population
     end
@@ -77,6 +82,11 @@
         population["ξ"] = 0.01
         population["σ"] = 2.5
         
+        # Mobility variation parameters
+        population["mobility_variation_type"] = "none"
+        population["mobility_sigma_O"] = 0.0
+        population["mobility_sigma_D"] = 0.0
+
         return population
     end
 
