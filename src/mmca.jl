@@ -1,4 +1,117 @@
 """
+    ipfp_sparse(edgelist::Array{Int64, 2}, 
+                B::Array{Float64, 1}, 
+                O_target::Array{Float64, 1}, 
+                D_target::Array{Float64, 1}; 
+                max_iter::Int64=20, 
+                tol::Float64=1e-6)
+
+Iterative Proportional Fitting Procedure (RAS algorithm) for sparse edgelist.
+Finds a new flow matrix F consistent with marginals O and D, preserving the structure of B.
+Returns a row-stochastic matrix (transition probabilities).
+"""
+function ipfp_sparse(edgelist::Array{Int64, 2}, 
+                    B::Array{Float64, 1}, 
+                    O_target::Array{Float64, 1}, 
+                    D_target::Array{Float64, 1}; 
+                    max_iter::Int64=20, 
+                    tol::Float64=1e-6)
+    
+    L = length(B)
+    M = length(O_target)
+    F = copy(B)
+    
+    for iter in 1:max_iter
+        # 1. Row projection
+        row_sums = zeros(Float64, M)
+        for e in 1:L
+            u = edgelist[e, 1]
+            row_sums[u] += F[e]
+        end
+        
+        for e in 1:L
+            u = edgelist[e, 1]
+            F[e] *= O_target[u] / (row_sums[u] + 1e-12)
+        end
+        
+        # 2. Column projection
+        col_sums = zeros(Float64, M)
+        for e in 1:L
+            v = edgelist[e, 2]
+            col_sums[v] += F[e]
+        end
+        
+        # Check convergence on column sums before scaling
+        max_diff = maximum(abs.(col_sums .- D_target))
+        if max_diff < tol
+            break
+        end
+
+        for e in 1:L
+            v = edgelist[e, 2]
+            F[e] *= D_target[v] / (col_sums[v] + 1e-12)
+        end
+    end
+    
+    # 3. Final Row Normalization to ensure strict row-stochasticity (sum_j R_ij = 1.0)
+    row_sums = zeros(Float64, M)
+    for e in 1:L
+        u = edgelist[e, 1]
+        row_sums[u] += F[e]
+    end
+    for e in 1:L
+        u = edgelist[e, 1]
+        F[e] /= (row_sums[u] + 1e-12)
+    end
+    
+    return F
+end
+
+"""
+    update_mobility!(population::Population_Params, t::Int64)
+
+Generates time-varying mobility R(t) using IPFP and updates population density auxiliaries.
+"""
+function update_mobility!(population::Population_Params, t::Int64)
+    if population.mobility_variation_type == "none" || population.mobility_variation_type == ""
+        return
+    end
+
+    # Use local RNG for thread-safety and reproducibility
+    seed = population.mobility_rng_seed === nothing ? rand(UInt32) : population.mobility_rng_seed + t
+    rng = MersenneTwister(seed)
+
+    M = population.M
+    B = population.Rᵢⱼ_base
+    edgelist = population.edgelist
+
+    # 1. Compute baseline marginals
+    O_base = zeros(Float64, M)
+    D_base = zeros(Float64, M)
+    for e in 1:length(B)
+        O_base[edgelist[e, 1]] += B[e]
+        D_base[edgelist[e, 2]] += B[e]
+    end
+
+    # 2. Generate Noisy Marginals (Unbiased Lognormal)
+    # E[exp(X)] = exp(mu + sigma^2/2). We set mu = -sigma^2/2 to get mean 1.0.
+    O_t = O_base .* exp.(randn(rng, M) .* population.mobility_sigma_O .- (population.mobility_sigma_O^2 / 2))
+    D_t = D_base .* exp.(randn(rng, M) .* population.mobility_sigma_D .- (population.mobility_sigma_D^2 / 2))
+
+    # 3. Balance marginals (sum O must equal sum D for IPFP to converge)
+    D_t .*= sum(O_t) / sum(D_t)
+
+    # 4. Run IPFP
+    R_new = ipfp_sparse(edgelist, B, O_t, D_t)
+
+    # 5. Update population struct
+    population.Rᵢⱼ .= R_new
+    
+    # 6. Re-calculate density-dependent auxiliaries (n_eff, z, norm, mobilityᵍ)
+    update_population_params!(population)
+end
+
+"""
     update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                  Sᵢᵍᵥ::Array{Float64, 3},
                  τᵢᵍᵥ::Array{Float64, 3},
@@ -84,6 +197,12 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
         end
 
         update_population_params!(population)
+    end
+
+    # Stochastic Mobility variation
+    if population.mobility_variation_type != "none" && population.mobility_variation_type != ""
+        update_mobility!(population, t)
+        Rᵢⱼ = population.Rᵢⱼ # update local reference
     end
 
     # Get P and compute Q

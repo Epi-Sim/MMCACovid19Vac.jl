@@ -339,6 +339,11 @@ struct Population_Params
     pᵍ_eff::Array{Float64, 1}
     edgelist::Array{Int64, 2}
     Rᵢⱼ::Array{Float64, 1}
+    Rᵢⱼ_base::Array{Float64, 1}
+    mobility_variation_type::String
+    mobility_sigma_O::Float64
+    mobility_sigma_D::Float64
+    mobility_rng_seed::Union{Int64, Nothing}
     mobilityᵍ::Array{Float64, 2}
     kᵍ::Array{Float64, 1}
     kᵍ_h::Array{Float64, 1}
@@ -432,7 +437,7 @@ function Population_Params(G::Int64,
                                   normᵍ, ξ, pᵍ, sᵢ, edgelist, Rᵢⱼ, M, G)
 
     return Population_Params(G, M, nᵢ, copy(nᵢᵍ), nᵢ_eff, nᵢᵍ_eff, N, Nᵍ,
-                             copy(pᵍ), copy(pᵍ), edgelist, Rᵢⱼ, mobilityᵍ,
+                             copy(pᵍ), copy(pᵍ), edgelist, Rᵢⱼ, copy(Rᵢⱼ), "none", 0.0, 0.0, nothing, mobilityᵍ,
                              copy(kᵍ), copy(kᵍ_h), copy(kᵍ_w), copy(kᵍ), copy(C),
                              zᵍ, normᵍ, copy(sᵢ), ξ, σ)
 end
@@ -532,10 +537,28 @@ function init_pop_param_struct(G::Int64, M::Int64,
     # Average household size
     σ = pop_params_dict["σ"]
 
+    # Mobility variation parameters
+    mobility_variation_type = get(pop_params_dict, "mobility_variation_type", "none")
+    mobility_sigma_O = Float64(get(pop_params_dict, "mobility_sigma_O", 0.0))
+    mobility_sigma_D = Float64(get(pop_params_dict, "mobility_sigma_D", 0.0))
+    mobility_rng_seed = get(pop_params_dict, "mobility_rng_seed", nothing)
+
     edgelist = Array{Int64, 2}(network_df[:, 1:2])
     Rᵢⱼ      = Array{Float64}(network_df[:, 3])
     edgelist, Rᵢⱼ = correct_self_loops(edgelist, Rᵢⱼ, M)
     pop_params    = Population_Params(G, M, nᵢᵍ, kᵍ, kᵍ_h, kᵍ_w, C, pᵍ, edgelist, Rᵢⱼ, sᵢ, ξ, σ)
+
+    # Set new fields
+    pop_params = Population_Params(
+        pop_params.G, pop_params.M, pop_params.nᵢ, pop_params.nᵢᵍ,
+        pop_params.nᵢ_eff, pop_params.nᵢᵍ_eff, pop_params.N, pop_params.Nᵍ,
+        pop_params.pᵍ, pop_params.pᵍ_eff, pop_params.edgelist, pop_params.Rᵢⱼ,
+        copy(pop_params.Rᵢⱼ), mobility_variation_type, mobility_sigma_O,
+        mobility_sigma_D, mobility_rng_seed, pop_params.mobilityᵍ,
+        pop_params.kᵍ, pop_params.kᵍ_h, pop_params.kᵍ_w, pop_params.kᵍ_eff,
+        pop_params.C, pop_params.zᵍ, pop_params.normᵍ, pop_params.sᵢ,
+        pop_params.ξ, pop_params.σ
+    )
 
     return pop_params
 end

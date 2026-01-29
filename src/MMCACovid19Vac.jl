@@ -1,6 +1,6 @@
 module MMCACovid19Vac
 
-using Statistics, Dates, Printf, Logging, LinearAlgebra
+using Statistics, Dates, Printf, Logging, LinearAlgebra, Random
 using CSV, NPZ, JSON, HDF5, DataStructures, DelimitedFiles, DataFrames, NetCDF
 
 

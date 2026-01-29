@@ -302,9 +302,97 @@ end
 # set_compartments!(epi_params, population, initial_compartments)
 # run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
 
-@testset "run_simulation" begin
-    output_fname = "compartments_full.nc"
-    run_epidemic_spreading_mmca!(epi_params, population, npi_params, tᵛs, ϵᵍs; verbose = true )
-    save_simulation_netCDF(epi_params, population, output_fname)
+@testset "mobility_variation" begin
+    # Helper to get a fresh population
+    function get_fresh_pop(v_type, sigma_O, sigma_D, seed)
+        # Re-load data to ensure no shared mutable objects
+        metapop_df = CSV.read(joinpath(data_path, data_dict["metapopulation_data_filename"]), DataFrame, types=Dict(:id => String))
+        network_df = CSV.read(joinpath(data_path, data_dict["mobility_matrix_filename"]), DataFrame)
+        pop = init_pop_param_struct(G, M, G_coords, pop_params_dict, metapop_df, network_df)
+        
+        # Manually set the new fields (struct is immutable but contains mutable arrays)
+        # Actually struct is struct, so we can't easily re-set. 
+        # But Population_Params constructor returns a new one.
+        
+        # We need to construct a new one with the desired variation params
+        return Population_Params(
+            pop.G, pop.M, pop.nᵢ, pop.nᵢᵍ,
+            pop.nᵢ_eff, pop.nᵢᵍ_eff, pop.N, pop.Nᵍ,
+            pop.pᵍ, pop.pᵍ_eff, pop.edgelist, pop.Rᵢⱼ,
+            copy(pop.Rᵢⱼ), v_type, sigma_O, sigma_D, seed, pop.mobilityᵍ,
+            pop.kᵍ, pop.kᵍ_h, pop.kᵍ_w, pop.kᵍ_eff,
+            pop.C, pop.zᵍ, pop.normᵍ, pop.sᵢ,
+            pop.ξ, pop.σ
+        )
+    end
+
+    # 1. Clean baseline results
+    reset_epidemic_compartments!(epi_params)
+    pop_base = get_fresh_pop("none", 0.0, 0.0, nothing)
+    set_initial_conditions!(epi_params, pop_base, Sᵛ₀, E₀, A₀, I₀, H₀, R₀)
+    run_epidemic_spreading_mmca!(epi_params, pop_base, npi_params, tᵛs, ϵᵍs; verbose = false)
+    baseline_results = copy(epi_params.ρᴵᵍᵥ)
+
+    @testset "reproducibility" begin
+        # Run 1
+        reset_epidemic_compartments!(epi_params)
+        pop1 = get_fresh_pop("ipfp_simple", 0.1, 0.1, 42)
+        set_initial_conditions!(epi_params, pop1, Sᵛ₀, E₀, A₀, I₀, H₀, R₀)
+        run_epidemic_spreading_mmca!(epi_params, pop1, npi_params, tᵛs, ϵᵍs; verbose = false)
+        res1 = copy(epi_params.ρᴵᵍᵥ)
+
+        # Run 2
+        reset_epidemic_compartments!(epi_params)
+        pop2 = get_fresh_pop("ipfp_simple", 0.1, 0.1, 42)
+        set_initial_conditions!(epi_params, pop2, Sᵛ₀, E₀, A₀, I₀, H₀, R₀)
+        run_epidemic_spreading_mmca!(epi_params, pop2, npi_params, tᵛs, ϵᵍs; verbose = false)
+        res2 = copy(epi_params.ρᴵᵍᵥ)
+
+        @test res1 ≈ res2 atol=1e-12
+    end
+
+    @testset "high_noise_divergence" begin
+        # Run with high noise
+        reset_epidemic_compartments!(epi_params)
+        pop_high = get_fresh_pop("ipfp_simple", 0.5, 0.5, 123)
+        set_initial_conditions!(epi_params, pop_high, Sᵛ₀, E₀, A₀, I₀, H₀, R₀)
+        run_epidemic_spreading_mmca!(epi_params, pop_high, npi_params, tᵛs, ϵᵍs; verbose = false)
+        res_high = copy(epi_params.ρᴵᵍᵥ)
+
+        # Should differ from baseline
+        @test !isapprox(res_high, baseline_results, atol=1e-4)
+        @test all(epi_params.ρˢᵍᵥ .>= -1e-12)
+    end
+
+    @testset "ipfp_structural_properties" begin
+        # 1. Topology Preservation (Island Test)
+        # We check that IPFP never creates edges where weight was 0
+        pop_struct = get_fresh_pop("ipfp_simple", 1.0, 1.0, 999) # High noise
+        
+        # Manually trigger update
+        MMCACovid19Vac.update_mobility!(pop_struct, 1)
+        
+        # Check zeros are preserved
+        for i in 1:length(pop_struct.Rᵢⱼ)
+            if pop_struct.Rᵢⱼ_base[i] == 0.0
+                @test pop_struct.Rᵢⱼ[i] == 0.0
+            end
+        end
+
+        # 2. Row Stochasticity
+        # Check that rows sum to 1.0
+        # We need to reconstruct the matrix or sum by edges
+        row_sums = zeros(Float64, pop_struct.M)
+        for k in 1:length(pop_struct.Rᵢⱼ)
+            u = pop_struct.edgelist[k, 1]
+            row_sums[u] += pop_struct.Rᵢⱼ[k]
+        end
+        @test all(isapprox.(row_sums, 1.0, atol=1e-10))
+
+        # 3. Ghost Population Fix Verification
+        # Check that n_eff actually changed from the baseline initialization
+        # (Since we applied noise, the flows should shift, changing local density)
+        @test pop_struct.nᵢ_eff != pop_base.nᵢ_eff
+    end
 end
 
