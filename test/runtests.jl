@@ -394,5 +394,47 @@ end
         # (Since we applied noise, the flows should shift, changing local density)
         @test pop_struct.nᵢ_eff != pop_base.nᵢ_eff
     end
+
+    @testset "confinement_mechanism" begin
+        # Verify that kappa0 correctly reduces inter-patch mobility
+        reset_epidemic_compartments!(epi_params)
+        
+        # Create population with high mobility to start
+        pop_conf = get_fresh_pop("none", 0.0, 0.0, nothing)
+        pop_conf.pᵍ .= 1.0 # Everyone wants to move
+        
+        # Test 1: No confinement (kappa = 0)
+        kappa_zero = 0.0
+        kappa_full = 0.99 # 99% confinement
+        
+        # Case A: Kappa = 0
+        pop_conf.pᵍ_eff .= (1 - kappa_zero) .* pop_conf.pᵍ
+        update_population_params!(pop_conf)
+        
+        # Check off-diagonal flow exists
+        off_diag_flow_A = 0.0
+        for k in 1:length(pop_conf.Rᵢⱼ)
+            u, v = pop_conf.edgelist[k, 1], pop_conf.edgelist[k, 2]
+            if u != v
+                off_diag_flow_A += sum(pop_conf.mobilityᵍ[:, k])
+            end
+        end
+        @test off_diag_flow_A > 1.0 # Should be substantial
+        
+        # Case B: Kappa = 0.99
+        pop_conf.pᵍ_eff .= (1 - kappa_full) .* pop_conf.pᵍ
+        update_population_params!(pop_conf)
+        
+        off_diag_flow_B = 0.0
+        for k in 1:length(pop_conf.Rᵢⱼ)
+            u, v = pop_conf.edgelist[k, 1], pop_conf.edgelist[k, 2]
+            if u != v
+                off_diag_flow_B += sum(pop_conf.mobilityᵍ[:, k])
+            end
+        end
+        
+        # The flow should be reduced by roughly factor (1-0.99)
+        @test off_diag_flow_B < off_diag_flow_A * 0.02
+    end
 end
 
