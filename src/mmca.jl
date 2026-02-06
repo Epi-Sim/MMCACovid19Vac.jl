@@ -71,9 +71,22 @@ end
     update_mobility!(population::Population_Params, t::Int64)
 
 Generates time-varying mobility R(t) using IPFP and updates population density auxiliaries.
+For external_netcdf mode, uses preloaded mobility series.
 """
 function update_mobility!(population::Population_Params, t::Int64)
     if population.mobility_variation_type == "none" || population.mobility_variation_type == ""
+        return
+    end
+
+    # External NetCDF mode: use preloaded mobility series
+    if population.mobility_variation_type == "external_netcdf"
+        if isnothing(population.mobility_external_series)
+            error("External mobility not loaded. Call load_external_mobility! first.")
+        end
+        R_series = population.mobility_external_series
+        # Validation at load time guarantees t is within bounds
+        population.Rᵢⱼ .= R_series[t, :]
+        update_population_params!(population)
         return
     end
 
@@ -109,6 +122,189 @@ function update_mobility!(population::Population_Params, t::Int64)
     
     # 6. Re-calculate density-dependent auxiliaries (n_eff, z, norm, mobilityᵍ)
     update_population_params!(population)
+end
+
+
+"""
+    load_external_mobility!(population::Population_Params,
+                           config::Dict;
+                           verbose::Bool=true)
+
+Load external mobility from NetCDF file and store it in the Population_Params struct.
+
+This function reads configuration parameters from the config dict and loads the
+external mobility time series from a NetCDF file. The loaded series is stored in
+the `mobility_external_series` field for use during simulation.
+
+Note: Returns a new Population_Params instance since the struct is immutable.
+
+# Arguments
+- `population::Population_Params`: Population params struct
+- `config::Dict`: Configuration dictionary containing:
+  - `mobility_external_file`: Path to NetCDF file
+  - `mobility_external_variable`: Variable name in NetCDF (default: "mobility")
+  - `mobility_validate`: Whether to validate loaded data (default: true)
+  - `mobility_fill_missing`: Whether to interpolate missing dates (default: false)
+  - `mobility_time_alignment`: Date alignment mode (default: "start")
+  - `start_date`: Simulation start date as Date object or string
+  - `end_date`: Simulation end date as Date object or string
+- `verbose::Bool=true`: Whether to print progress
+
+# Returns
+- `Population_Params`: New instance with loaded mobility series
+"""
+function load_external_mobility!(population::Population_Params,
+                                config::Dict;
+                                verbose::Bool=true)
+    if population.mobility_variation_type != "external_netcdf"
+        if verbose
+            @info "mobility_variation_type is not 'external_netcdf', skipping load"
+        end
+        return population
+    end
+
+    # Get config parameters
+    filename = get(config, "mobility_external_file", nothing)
+    if isnothing(filename)
+        error("mobility_external_file not specified in config")
+    end
+
+    varname = get(config, "mobility_external_variable", "mobility")
+    validate = get(config, "mobility_validate", true)
+    fill_missing = get(config, "mobility_fill_missing", false)
+    alignment = get(config, "mobility_time_alignment", "start")
+
+    # Parse dates
+    start_date_str = get(config, "start_date", nothing)
+    end_date_str = get(config, "end_date", nothing)
+
+    if isnothing(start_date_str) || isnothing(end_date_str)
+        error("start_date and end_date must be specified in config for external mobility")
+    end
+
+    start_date = start_date_str isa Date ? start_date_str : Date(start_date_str)
+    end_date = end_date_str isa Date ? end_date_str : Date(end_date_str)
+
+    # Load mobility from NetCDF
+    if verbose
+        @info "Loading external mobility from $(filename)"
+    end
+
+    R_series, dates = load_mobility_netcdf(filename, population, start_date, end_date,
+                                          varname=varname, validate=validate,
+                                          fill_missing=fill_missing, alignment=alignment,
+                                          verbose=verbose)
+
+    # Create new Population_Params with loaded mobility series
+    new_pop = Population_Params(
+        population.G, population.M, population.nᵢ, population.nᵢᵍ,
+        population.nᵢ_eff, population.nᵢᵍ_eff, population.N, population.Nᵍ,
+        population.pᵍ, population.pᵍ_eff, population.edgelist, population.Rᵢⱼ,
+        population.Rᵢⱼ_base, population.mobility_variation_type,
+        population.mobility_sigma_O, population.mobility_sigma_D,
+        population.mobility_rng_seed, R_series, population.mobilityᵍ,
+        population.kᵍ, population.kᵍ_h, population.kᵍ_w, population.kᵍ_eff,
+        population.C, population.zᵍ, population.normᵍ, population.sᵢ,
+        population.ξ, population.σ
+    )
+
+    if verbose
+        @info "External mobility loaded: $(size(R_series, 1)) timesteps"
+    end
+
+    return new_pop
+end
+
+
+"""
+    validate_mobility_series(R_series::Array{Float64, 2},
+                             edgelist::Array{Int64, 2},
+                             M::Int64, T::Int64;
+                             tol_row_stochastic::Float64=1e-4,
+                             tol_non_negative::Float64=1e-10,
+                             verbose::Bool=true)
+
+Validate a time series of mobility matrices against MMCACovid19Vac model constraints.
+
+This function checks that the externally generated mobility series satisfies:
+1. Row-stochasticity: For each origin i, sum_j R_ij = 1.0
+2. Non-negativity: All mobility weights must be >= 0
+3. Shape consistency: R_series must be (T, E) where E is the number of edges
+
+# Arguments
+- `R_series::Array{Float64, 2}`: Mobility series of shape (T, E) where T is timesteps, E is edges
+- `edgelist::Array{Int64, 2}`: Sparse edgelist of shape (E, 2) with [origin, destination] pairs
+- `M::Int64`: Number of patches (metapopulations)
+- `T::Int64`: Number of timesteps
+- `tol_row_stochastic::Float64`: Tolerance for row-stochasticity check (default: 1e-4)
+- `tol_non_negative::Float64`: Tolerance for non-negativity check (default: 1e-10)
+- `verbose::Bool`: Whether to print validation details (default: true)
+
+# Returns
+- `is_valid::Bool`: true if all validations pass, false otherwise
+- `errors::Vector{String}`: List of error messages (empty if valid)
+
+# Example
+```julia
+edgelist = population.edgelist
+R_series = generate_mobility_series(...)  # Shape (T, E)
+is_valid, errors = validate_mobility_series(R_series, edgelist, population.M, T)
+```
+"""
+function validate_mobility_series(R_series::Array{Float64, 2},
+                                 edgelist::Array{Int64, 2},
+                                 M::Int64, T::Int64;
+                                 tol_row_stochastic::Float64=1e-4,
+                                 tol_non_negative::Float64=1e-10,
+                                 verbose::Bool=true)
+    errors = String[]
+    L = length(edgelist[:, 1])
+
+    # Check shape
+    if size(R_series) != (T, L)
+        push!(errors, "Shape mismatch: expected ($(T), $(L)), got $(size(R_series))")
+        return false, errors
+    end
+
+    # Check for negative values
+    if any(R_series .< -tol_non_negative)
+        negative_count = count(R_series .< -tol_non_negative)
+        push!(errors, "Found $(negative_count) negative values in mobility series")
+        return false, errors
+    end
+
+    # Check row-stochasticity for each timestep
+    for t in 1:T
+        R_t = R_series[t, :]
+        row_sums = zeros(Float64, M)
+        for e in 1:L
+            u = edgelist[e, 1]
+            row_sums[u] += R_t[e]
+        end
+
+        for i in 1:M
+            if abs(row_sums[i] - 1.0) > tol_row_stochastic
+                push!(errors, "[t=$(t)] Row $(i) not stochastic: sum = $(row_sums[i]), expected 1.0")
+            end
+        end
+    end
+
+    is_valid = length(errors) == 0
+
+    if verbose
+        if is_valid
+            @info "Mobility series validation: PASSED"
+            @info "  - Shape: $(size(R_series))"
+            @info "  - Timesteps: $(T), Patches: $(M), Edges: $(L)"
+        else
+            @error "Mobility series validation: FAILED"
+            for err in errors
+                @error "  - $(err)"
+            end
+        end
+    end
+
+    return is_valid, errors
 end
 
 """
