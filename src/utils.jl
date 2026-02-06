@@ -344,6 +344,7 @@ struct Population_Params
     mobility_sigma_O::Float64
     mobility_sigma_D::Float64
     mobility_rng_seed::Union{Int64, Nothing}
+    mobility_external_series::Union{Array{Float64, 2}, Nothing}  # (T, L) array for external NetCDF mobility
     mobilityᵍ::Array{Float64, 2}
     kᵍ::Array{Float64, 1}
     kᵍ_h::Array{Float64, 1}
@@ -437,7 +438,7 @@ function Population_Params(G::Int64,
                                   normᵍ, ξ, pᵍ, sᵢ, edgelist, Rᵢⱼ, M, G)
 
     return Population_Params(G, M, nᵢ, copy(nᵢᵍ), nᵢ_eff, nᵢᵍ_eff, N, Nᵍ,
-                             copy(pᵍ), copy(pᵍ), edgelist, Rᵢⱼ, copy(Rᵢⱼ), "none", 0.0, 0.0, nothing, mobilityᵍ,
+                             copy(pᵍ), copy(pᵍ), edgelist, Rᵢⱼ, copy(Rᵢⱼ), "none", 0.0, 0.0, nothing, nothing, mobilityᵍ,
                              copy(kᵍ), copy(kᵍ_h), copy(kᵍ_w), copy(kᵍ), copy(C),
                              zᵍ, normᵍ, copy(sᵢ), ξ, σ)
 end
@@ -554,7 +555,7 @@ function init_pop_param_struct(G::Int64, M::Int64,
         pop_params.nᵢ_eff, pop_params.nᵢᵍ_eff, pop_params.N, pop_params.Nᵍ,
         pop_params.pᵍ, pop_params.pᵍ_eff, pop_params.edgelist, pop_params.Rᵢⱼ,
         copy(pop_params.Rᵢⱼ), mobility_variation_type, mobility_sigma_O,
-        mobility_sigma_D, mobility_rng_seed, pop_params.mobilityᵍ,
+        mobility_sigma_D, mobility_rng_seed, nothing, pop_params.mobilityᵍ,
         pop_params.kᵍ, pop_params.kᵍ_h, pop_params.kᵍ_w, pop_params.kᵍ_eff,
         pop_params.C, pop_params.zᵍ, pop_params.normᵍ, pop_params.sᵢ,
         pop_params.ξ, pop_params.σ
