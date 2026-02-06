@@ -127,3 +127,20 @@ end
 ## 5. Performance Considerations
 *   **Cost:** IPFP is linear in edges $O(E)$. `update_population_params!` is $O(E \cdot G)$. Total overhead is low for typical metapopulations (e.g., municipal/regional graphs).
 *   **Optimization:** If noise is pre-calculated (time-series file) rather than stochastic, we can load $R(t)$ directly. For stochastic noise, on-the-fly IPFP is efficient enough.
+
+## 6. Alternative: External NetCDF Input
+
+As an alternative to IPFP-generated stochastic mobility, the model also supports loading pre-computed mobility time series from external NetCDF files. This is useful when:
+- Mobility data comes from empirical sources (e.g., cell phone data, travel surveys)
+- You want to use a specific mobility scenario without stochastic generation
+- You need to reproduce exact mobility patterns from another study
+
+See `MOBILITY_CONFIGURATION.md` for details on the `external_netcdf` mode.
+
+The key differences:
+| Feature | IPFP (`ipfp_simple`) | External (`external_netcdf`) |
+|---------|---------------------|------------------------------|
+| Source | Stochastic generation | Pre-computed file |
+| Reproducibility | Requires seed | Exact replay |
+| Computational cost | IPFP overhead per step | Minimal (direct lookup) |
+| Validation | Row-stochastic by construction | Optional validation step |
