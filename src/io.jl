@@ -78,14 +78,21 @@
         population["kᵍ"] = ones(G) * 12
         population["kᵍ_h"] = ones(G) * 3.15
         population["kᵍ_w"] = ones(G) * 2
-        population["pᵍ"] = ones(G) 
+        population["pᵍ"] = ones(G)
         population["ξ"] = 0.01
         population["σ"] = 2.5
-        
+
         # Mobility variation parameters
-        population["mobility_variation_type"] = "none"
+        population["mobility_variation_type"] = "none"  # "none", "ipfp_simple", "external_netcdf"
         population["mobility_sigma_O"] = 0.0
         population["mobility_sigma_D"] = 0.0
+
+        # External mobility NetCDF parameters
+        population["mobility_external_file"] = nothing
+        population["mobility_external_variable"] = "mobility"
+        population["mobility_validate"] = true
+        population["mobility_fill_missing"] = false
+        population["mobility_time_alignment"] = "start"  # "start", "end", "nearest"
 
         return population
     end
@@ -235,25 +242,7 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
     
     V_coords = epi_params.VaccLabels
 
-    g_dim = NcDim("G", G, atts=Dict("description" => "Age strata", "Unit" => "unitless"), values=G_coords, unlimited=false)
-    m_dim = NcDim("M", M, atts=Dict("description" => "Region", "Unit" => "unitless"), values=M_coords, unlimited=false)
-    t_dim = NcDim("T", T, atts=Dict("description" => "Time", "Unit" => "unitless"), values=T_coords, unlimited=false)
-    v_dim = NcDim("V", V, atts=Dict("description" => "Vaccination status", "Unit" => "unitless"), values=V_coords, unlimited=false)
-    dimlist = [g_dim, m_dim, t_dim, v_dim]
-
-    S  = NcVar("S" , dimlist; atts=Dict("description" => "Suceptibles"), t=Float64, compress=-1)
-    E  = NcVar("E" , dimlist; atts=Dict("description" => "Exposed"), t=Float64, compress=-1)
-    A  = NcVar("A" , dimlist; atts=Dict("description" => "Asymptomatic"), t=Float64, compress=-1)
-    I  = NcVar("I" , dimlist; atts=Dict("description" => "Infected"), t=Float64, compress=-1)
-    PH = NcVar("PH", dimlist; atts=Dict("description" => "Pre-hospitalized"), t=Float64, compress=-1)
-    PD = NcVar("PD", dimlist; atts=Dict("description" => "Pre-deceased"), t=Float64, compress=-1)
-    HR = NcVar("HR", dimlist; atts=Dict("description" => "Hospitalized-good"), t=Float64, compress=-1)
-    HD = NcVar("HD", dimlist; atts=Dict("description" => "Hospitalized-bad"), t=Float64, compress=-1)
-    R  = NcVar("R" , dimlist; atts=Dict("description" => "Recovered"), t=Float64, compress=-1)
-    D  = NcVar("D" , dimlist; atts=Dict("description" => "Dead"), t=Float64, compress=-1)
-    CH  = NcVar("CH" , dimlist; atts=Dict("description" => "Confined"), t=Float64, compress=-1)
-    varlist = [S, E, A, I, PH, PD, HR, HD, R, D, CH]
-
+    # Prepare data dictionary
     data_dict = Dict()
     data_dict["S"]  = epi_params.ρˢᵍᵥ .* population.nᵢᵍ
     data_dict["E"]  = epi_params.ρᴱᵍᵥ  .* population.nᵢᵍ
@@ -267,13 +256,51 @@ function save_simulation_netCDF( epi_params::Epidemic_Params,
     data_dict["D"]  = epi_params.ρᴰᵍᵥ  .* population.nᵢᵍ
     data_dict["CH"] = epi_params.CHᵢᵍᵥ .* population.nᵢᵍ
 
+    # Remove file if exists
     isfile(output_fname) && rm(output_fname)
 
-    # nccreate(output_fname, "I", "G", G_coords, "M", M_coords, "T", T_coords, "V", V_coords)
-    NetCDF.create(output_fname, varlist, mode=NC_NETCDF4)
-    for var_label in epi_params.CompLabels
-        data = data_dict[var_label]
-        ncwrite(data, output_fname, var_label)
+    # Create dataset using NCDatasets
+    ds = NCDataset(output_fname, "c")
+
+    try
+        # Define dimensions
+        defDim(ds, "G", G)
+        defDim(ds, "M", M)
+        defDim(ds, "T", T)
+        defDim(ds, "V", V)
+
+        # Define variables
+        defVar(ds, "S", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "E", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "A", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "I", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "PH", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "PD", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "HR", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "HD", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "R", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "D", Float64, ("G", "M", "T", "V"))
+        defVar(ds, "CH", Float64, ("G", "M", "T", "V"))
+
+        # Set attributes
+        ds["S"].attrib["description"] = "Suceptibles"
+        ds["E"].attrib["description"] = "Exposed"
+        ds["A"].attrib["description"] = "Asymptomatic"
+        ds["I"].attrib["description"] = "Infected"
+        ds["PH"].attrib["description"] = "Pre-hospitalized"
+        ds["PD"].attrib["description"] = "Pre-deceased"
+        ds["HR"].attrib["description"] = "Hospitalized-good"
+        ds["HD"].attrib["description"] = "Hospitalized-bad"
+        ds["R"].attrib["description"] = "Recovered"
+        ds["D"].attrib["description"] = "Dead"
+        ds["CH"].attrib["description"] = "Confined"
+
+        # Write data
+        for var_label in epi_params.CompLabels
+            ds[var_label][:,:,:,:] = data_dict[var_label]
+        end
+    finally
+        close(ds)
     end
 
 end
@@ -327,17 +354,7 @@ function save_observables_netCDF(   epi_params::Epidemic_Params,
         T_coords = collect(1:T) 
     end
 
-    g_dim = NcDim("G", G, atts=Dict("description" => "Age strata", "Unit" => "unitless"), values=G_coords, unlimited=false)
-    m_dim = NcDim("M", M, atts=Dict("description" => "Region", "Unit" => "unitless"), values=M_coords, unlimited=false)
-    t_dim = NcDim("T", T, atts=Dict("description" => "Time", "Unit" => "unitless"), values=T_coords, unlimited=false)
-    dimlist = [g_dim, m_dim, t_dim]
-
-    newI  = NcVar("new_infected" , dimlist; atts=Dict("description" => "Daily infections"), t=Float64, compress=-1)
-    newH  = NcVar("new_hospitalized" , dimlist; atts=Dict("description" => "Daily hospitalizations"), t=Float64, compress=-1)
-    newD  = NcVar("new_deaths" , dimlist; atts=Dict("description" => "Daily deaths"), t=Float64, compress=-1)
-    R_eff = NcVar("R_eff" , dimlist; atts=Dict("description" => "Effective reproduction number over an infectious period of 14 days"), t=Float64, compress=-1)
-    
- 
+    # Prepare data dictionary
     data_dict = Dict()
     data_dict["new_infected"] = sum((epi_params.ρᴬᵍᵥ  .* population.nᵢᵍ), dims=(4))[:,:,:,1] .* epi_params.αᵍ
 
@@ -352,25 +369,338 @@ function save_observables_netCDF(   epi_params::Epidemic_Params,
 
     τ = 14
 
-    if T <= τ
-        @warn "The number of time steps T ($(T)) is smaller than τ ($(τ)), R is not computable"
-        varlist = [newI, newH, newD]
-
-    else
-
-        data_dict["R_eff"] = zeros(Float64, G, M, T)
-        
-        Rᵢᵍ_eff = compute_R_eff_matrix(epi_params, population, τ)[6]
-        data_dict["R_eff"][:, :, τ+1:end] .= Rᵢᵍ_eff
-        varlist = [newI, newH, newD, R_eff]
-    end
-    
+    # Remove file if exists
     isfile(output_fname) && rm(output_fname)
-    NetCDF.create(output_fname, varlist, mode=NC_NETCDF4)
-    for var_label in keys(data_dict)
-        data = data_dict[var_label]
-        ncwrite(data, output_fname, var_label)
+
+    # Create dataset using NCDatasets
+    ds = NCDataset(output_fname, "c")
+
+    try
+        # Define dimensions
+        defDim(ds, "G", G)
+        defDim(ds, "M", M)
+        defDim(ds, "T", T)
+
+        # Define variables
+        defVar(ds, "new_infected", Float64, ("G", "M", "T"))
+        defVar(ds, "new_hospitalized", Float64, ("G", "M", "T"))
+        defVar(ds, "new_deaths", Float64, ("G", "M", "T"))
+
+        # Set attributes
+        ds["new_infected"].attrib["description"] = "Daily infections"
+        ds["new_hospitalized"].attrib["description"] = "Daily hospitalizations"
+        ds["new_deaths"].attrib["description"] = "Daily deaths"
+
+        # Write data
+        ds["new_infected"][:,:,:] = data_dict["new_infected"]
+        ds["new_hospitalized"][:,:,:] = data_dict["new_hospitalized"]
+        ds["new_deaths"][:,:,:] = data_dict["new_deaths"]
+
+        # Handle R_eff if T > τ
+        if T <= τ
+            @warn "The number of time steps T ($(T)) is smaller than τ ($(τ)), R is not computable"
+        else
+            data_dict["R_eff"] = zeros(Float64, G, M, T)
+            Rᵢᵍ_eff = compute_R_eff_matrix(epi_params, population, τ)[6]
+            data_dict["R_eff"][:, :, τ+1:end] .= Rᵢᵍ_eff
+
+            defVar(ds, "R_eff", Float64, ("G", "M", "T"))
+            ds["R_eff"].attrib["description"] = "Effective reproduction number over an infectious period of 14 days"
+            ds["R_eff"][:,:,:] = data_dict["R_eff"]
+        end
+    finally
+        close(ds)
     end
+end
+
+
+### ----------------------------------------------------------------------------
+### MOBILITY NETCDF I/O FUNCTIONS
+### ----------------------------------------------------------------------------
+
+"""
+    parse_date_strings(date_strs::Array{String, 1})
+
+Parse date strings from NetCDF coordinate to Date objects.
+
+# Arguments
+- `date_strs::Array{String, 1}`: Array of date strings (e.g., "2020-03-10")
+
+# Returns
+- `dates::Array{Date, 1}`: Array of Date objects
+"""
+function parse_date_strings(date_strs::Array{String, 1})
+    return [Date(d) for d in date_strs]
+end
+
+
+"""
+    align_dates(netcdf_dates::Array{Date, 1},
+               sim_start_date::Date,
+               sim_end_date::Date;
+               alignment::String="start",
+               fill_missing::Bool=false)
+
+Find indices in NetCDF dates that match the simulation period.
+
+# Arguments
+- `netcdf_dates::Array{Date, 1}`: Dates from NetCDF file
+- `sim_start_date::Date`: Simulation start date
+- `sim_end_date::Date`: Simulation end date
+- `alignment::String="start"`: Alignment mode - "start", "end", or "nearest"
+- `fill_missing::Bool=false`: Whether to interpolate missing dates
+
+# Returns
+- `indices::Array{Int, 1}`: Indices of NetCDF dates to use
+- `aligned_dates::Array{Date, 1}`: Corresponding dates
+"""
+function align_dates(netcdf_dates::Array{Date, 1},
+                    sim_start_date::Date,
+                    sim_end_date::Date;
+                    alignment::String="start",
+                    fill_missing::Bool=false)
+    T = (sim_end_date - sim_start_date).value + 1
+    indices = zeros(Int, T)
+    aligned_dates = Array{Date, 1}(undef, T)
+
+    for (t_idx, sim_date) in enumerate(sim_start_date:Day(1):sim_end_date)
+        # Find matching or nearest date in NetCDF
+        if fill_missing
+            # Find nearest date
+            diffs = [abs((d - sim_date).value) for d in netcdf_dates]
+            nearest_idx = argmin(diffs)
+            indices[t_idx] = nearest_idx
+            aligned_dates[t_idx] = netcdf_dates[nearest_idx]
+        else
+            # Find exact match
+            exact_idx = findfirst(==(sim_date), netcdf_dates)
+            if exact_idx === nothing
+                error("Date $(sim_date) not found in NetCDF file. Use fill_missing=true to interpolate.")
+            end
+            indices[t_idx] = exact_idx
+            aligned_dates[t_idx] = netcdf_dates[exact_idx]
+        end
+    end
+
+    return indices, aligned_dates
+end
+
+
+"""
+    load_mobility_netcdf(filename::String,
+                         population::Population_Params,
+                         sim_start_date::Date,
+                         sim_end_date::Date;
+                         varname::String="mobility",
+                         validate::Bool=true,
+                         fill_missing::Bool=false,
+                         alignment::String="start",
+                         verbose::Bool=true)
+
+Load mobility time series from NetCDF file and convert to sparse edgelist format.
+
+# Expected NetCDF Format
+```
+Dimensions:
+  date: T (timesteps)
+  origin: M (patches)
+  destination: M (patches)
+
+Variables:
+  mobility(date, origin, destination): Float32/Float64
+
+Coordinates:
+  date: date strings (e.g., "2020-03-10")
+  origin: 1 to M
+  destination: 1 to M
+```
+
+# Arguments
+- `filename::String`: Path to NetCDF file
+- `population::Population_Params`: Population params struct with edgelist
+- `sim_start_date::Date`: Simulation start date
+- `sim_end_date::Date`: Simulation end date
+- `varname::String="mobility"`: Name of mobility variable in NetCDF
+- `validate::Bool=true`: Whether to validate the loaded series
+- `fill_missing::Bool=false`: Whether to interpolate missing dates
+- `alignment::String="start"`: Date alignment mode
+- `verbose::Bool=true`: Whether to print progress
+
+# Returns
+- `R_series::Array{Float64, 2}`: Mobility series of shape (T, L) where L is edges
+- `dates::Array{Date, 1}`: Aligned dates for each timestep
+"""
+function load_mobility_netcdf(filename::String,
+                             population::Population_Params,
+                             sim_start_date::Date,
+                             sim_end_date::Date;
+                             varname::String="mobility",
+                             validate::Bool=true,
+                             fill_missing::Bool=false,
+                             alignment::String="start",
+                             verbose::Bool=true)
+
+    if verbose
+        @info "Loading mobility from NetCDF: $(filename)"
+    end
+
+    M = population.M
+    L = length(population.edgelist[:, 1])
+
+    # Open NetCDF file using NCDatasets (wraps HDF5, better ARM64 support)
+    ds = NCDataset(filename)
+
+    try
+        # Read mobility variable
+        if !haskey(ds, varname)
+            error("Variable '$(varname)' not found in NetCDF file")
+        end
+
+        mobility_dense = ds[varname][:,:,:]
+        date_strings = ds["date"][:]
+
+        # Get dimensions from the data array
+        T_netcdf, M_netcdf, M_dest = size(mobility_dense)
+
+        if verbose
+            @info "  NetCDF dimensions: date=$(T_netcdf), origin=$(M_netcdf), destination=$(M_dest)"
+        end
+
+        # Validate M matches
+        if M_netcdf != M
+            error("Dimension mismatch: NetCDF has M=$(M_netcdf), but population has M=$(M)")
+        end
+
+        # Parse date strings to Date objects
+        netcdf_dates = parse_date_strings(String.(date_strings))
+
+        # Align dates with simulation period
+        T_sim = (sim_end_date - sim_start_date).value + 1
+        indices, aligned_dates = align_dates(netcdf_dates, sim_start_date, sim_end_date,
+                                              alignment=alignment, fill_missing=fill_missing)
+
+        if verbose
+            @info "  Aligned $(length(indices)) timesteps from $(aligned_dates[1]) to $(aligned_dates[end])"
+        end
+
+        # Validate that external mobility covers the full simulation period
+        T_loaded = length(indices)
+        if T_loaded < T_sim
+            loaded_start = aligned_dates[1]
+            loaded_end = aligned_dates[end]
+            error("External mobility data insufficient for full simulation. " *
+                  "Loaded $(T_loaded) timesteps ($(loaded_start) to $(loaded_end)), " *
+                  "but simulation requires $(T_sim) timesteps ($(sim_start_date) to $(sim_end_date)). " *
+                  "Provide mobility data covering the entire simulation period.")
+        end
+
+        # Convert dense (T, M, M) to sparse (T, L) using edgelist
+        R_series = zeros(Float64, T_sim, L)
+        edgelist = population.edgelist
+
+        for t in 1:T_sim
+            nc_idx = indices[t]
+            for e in 1:L
+                origin = edgelist[e, 1]
+                dest = edgelist[e, 2]
+                R_series[t, e] = mobility_dense[nc_idx, origin, dest]
+            end
+        end
+
+        # Validate if requested
+        if validate
+            is_valid, errors = validate_mobility_series(R_series, population.edgelist,
+                                                        M, T_sim, verbose=verbose)
+            if !is_valid
+                @error "Mobility validation failed"
+                for err in errors
+                    @error "  - $(err)"
+                end
+                error("Invalid mobility series")
+            end
+        end
+
+        if verbose
+            @info "  Loaded mobility series: shape=$(size(R_series)), edges=$(L)"
+        end
+
+        return R_series, aligned_dates
+
+    finally
+        close(ds)
+    end
+end
+
+
+"""
+    save_mobility_netcdf(R_series::Array{Float64, 2},
+                         edgelist::Array{Int64, 2},
+                         dates::Array{Date, 1},
+                         filename::String;
+                         varname::String="mobility",
+                         compress::Int=4)
+
+Save mobility time series to NetCDF file.
+
+Converts sparse (T, L) format to dense (T, M, M) and saves to NetCDF.
+
+# Arguments
+- `R_series::Array{Float64, 2}`: Mobility series of shape (T, L)
+- `edgelist::Array{Int64, 2}`: Sparse edgelist of shape (L, 2)
+- `dates::Array{Date, 1}`: Dates for each timestep
+- `filename::String`: Output NetCDF filename
+- `varname::String="mobility"`: Name of mobility variable
+- `compress::Int=4`: Compression level (0-9, default 4). Set to 0 to disable.
+
+Note: Uses NCDatasets.jl which wraps HDF5 for better ARM64 (Apple Silicon) support.
+"""
+function save_mobility_netcdf(R_series::Array{Float64, 2},
+                             edgelist::Array{Int64, 2},
+                             dates::Array{Date, 1},
+                             filename::String;
+                             varname::String="mobility",
+                             compress::Union{Bool, Int}=4)
+
+    T, L = size(R_series)
+    M = maximum(edgelist)
+
+    @info "Saving mobility to NetCDF: $(filename)"
+    @info "  Dimensions: T=$(T), M=$(M), L=$(L)"
+
+    # Convert sparse (T, L) to dense (T, M, M)
+    mobility_dense = zeros(Float64, T, M, M)
+    for t in 1:T
+        for e in 1:L
+            origin = edgelist[e, 1]
+            dest = edgelist[e, 2]
+            mobility_dense[t, origin, dest] = R_series[t, e]
+        end
+    end
+
+    # Create NetCDF file using NCDatasets (wraps HDF5, better ARM64 support)
+    ds = NCDataset(filename, "c"; attrib=Dict("description" => "Mobility time series for MMCA model"))
+
+    try
+        # Define dimensions
+        defDim(ds, "date", T)
+        defDim(ds, "origin", M)
+        defDim(ds, "destination", M)
+
+        # Define and write date variable with string format
+        date_strs = [Dates.format(d, "yyyy-mm-dd") for d in dates]
+        defVar(ds, "date", String, ("date",))
+        ds["date"][:] = date_strs
+
+        # Define and write mobility variable
+        defVar(ds, varname, Float64, ("date", "origin", "destination"))
+        ds[varname].attrib["description"] = "Mobility flow probability"
+        ds[varname].attrib["units"] = "probability"
+        ds[varname][:,:,:] = mobility_dense
+    finally
+        close(ds)
+    end
+
+    @info "Mobility saved to $(filename)"
 end
 
 
