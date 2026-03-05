@@ -455,7 +455,7 @@ additional data allocations.
 function reset_params!(epi_params::Epidemic_Params,
                        population::Population_Params)
 
-    reset_epidemic_params!(epi_params)
+    reset_epidemic_compartments!(epi_params)
     population.pᵍ_eff .= population.pᵍ
     population.kᵍ_eff .= population.kᵍ
     update_population_params!(population)

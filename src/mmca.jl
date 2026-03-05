@@ -196,6 +196,8 @@ function update_prob!(Pᵢᵍᵥ::Array{Float64, 3},
                     ρˢᵍᵥ[g, i, t, v] -= CHᵢᵍᵥ[g, i, t, v] 
                     CHᵢᵍᵥ[g, i, t + 1 , v] = CHᵢ * aux
                 end
+            else
+                CHᵢᵍᵥ[g, i, t + 1, :] .= CHᵢᵍᵥ[g, i, t, :]
             end  
             
             # Reset values
